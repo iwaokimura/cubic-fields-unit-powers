@@ -1,0 +1,8 @@
+__pycache__/
+*.log
+*.time
+*.sage.py
+e020-e040-runs*/
+versions.txt
+verify-logs/
+verify-run.out
