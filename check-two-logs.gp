@@ -29,6 +29,12 @@
 \\ Together with E138 (m <= 30): no b, c in range and m >= 2 with eta_c = eta_b^m.
 \\  (H) E140 adds b = 2 and b = -1 (section H), so with E138 the statement holds for every
 \\      b != 0, 1 except (b, m) = (-1, 4), where eta_{-1}^4 = eta_5.
+\\  (I) E152 (H. Umemoto's proposal): the chain (A)-(C) uses only that lam is a unit > 1 of a
+\\      cubic field with one real place.  Every such unit has lam >= rho = 1.3247.. (Smyth), so
+\\      for m >= 124, lam^m >= rho^124 > 10^15 and (B), (C) hold with l = log lam >= log 1.3247.
+\\      Region IV: G(m, l) > 0 for all m >= M0 = 6082138 and l >= log 1.3247.  Hence lam^m of
+\\      h-type forces m < M0; with lam = eta_0 and m = n(b): n(b) < 6082138 for every b != 0, 1.
+\\      Paper 2, Section 10 (Proposition 10.20 and Corollary 10.21; Theorem B(iv)).
 
 if(default(parisize) < 800000000, default(parisize, 800000000));
 
@@ -38,7 +44,8 @@ check(c, msg) = { if(!c, printf("   [FAIL] %s\n", msg); FAIL++); return(c); };
 if(type(B0) != "t_INT", B0 = 163000);       \\ region II starts here; (F) covers 2 <= |b| < B0
 if(type(MCAP) != "t_INT", MCAP = 630000);
 if(type(M1) != "t_INT", M1 = 1310000);      \\ E140: exponent cap for b = -1 (lam = 3.10..)
-if(type(BSCAN) != "t_INT", BSCAN = B0);     \\ Tier 1 wrappers may lower this (then the gate is partial)
+if(type(BSCAN) != "t_INT", BSCAN = B0);
+if(type(M0) != "t_INT", M0 = 6082138);      \\ E152: exponent cap for every unit (region IV)     \\ Tier 1 wrappers may lower this (then the gate is partial)
 P = 320; SC = 2^P;
 
 hb(b) = { return(x^3 - 3*(b^2+b+1)*x^2 + 3*(b+1)*x - 1); };
@@ -131,6 +138,11 @@ Hup(m) = { my(L = logbr(3*m/40 + 3*m/(689/10))); return(max(17, 3*L[2] + 1208/10
 Glo(m, l, PI) = {
   my(H = Hup(m), L13 = logbr(13));
   return(m/2*l - L13[2] - (887/100)*((1098/100)*PI[2] + (15/10)*l)*H^2);
+};
+\\ upper bound for G(m, l) given an UPPER bound l for log lam (used only to show a test is not vacuous)
+Ghi(m, l, PI) = {
+  my(L = logbr(3*m/40 + 3*m/(689/10)), H = max(17, 3*L[1] + 1208/100), L13 = logbr(13));
+  return(m/2*l - L13[1] - (887/100)*((1098/100)*PI[1] + (15/10)*l)*H^2);
 };
 \\ the two monotonicity conditions: slope in l, slope in m (worst case at the smallest l)
 condmono(m, l, PI) = {
@@ -281,12 +293,33 @@ secH(PI) = {
   return(0);
 };
 
+\\ ---------- (I): E152, every unit lam > 1, region IV ----------
+secI(PI) = {
+  my(x0 = 13247/10000, l0 = logbr(x0), c, g, gm);
+  print("### (I) E152: any unit lam > 1 of a cubic field with one real place, m >= M0 ###");
+  check(subst(x^3 - x - 1, x, x0) < 0, "rho > 1.3247 (x^3 - x - 1 < 0 at 1.3247; one real root)");
+  check(x0^124 > 10^15, "lam^m >= 1.3247^124 > 10^15 for m >= 124");
+  \\ (B) needs lam^m >= 100 (|R_m| <= 7 lam^(-m/2)) and the crude step 3.5 pi lam^(-m/2) < 1/10
+  check((35*PI[2])^2 < 10^15, "crude step: 3.5 pi lam^(-m/2) < 1/10 when lam^m > 10^15");
+  check(3*124 > 689/10, "(C): b2/68.9 > 1 for m >= 124, so H increases with d");
+  check(3*logbr(124*(3/40 + 3/(689/10)))[1] + 1208/100 > 17, "(C): Hmax(m) is the log branch for m >= 124");
+  c = condmono(M0, l0[1], PI); g = Glo(M0, l0[1], PI);
+  printf("   M0 = %d, l >= log 1.3247: slope_l > 0: %d, slope_m > 0: %d, G >= %.6f\n", M0, c[1], c[2], g*1.);
+  check(c[1] && c[2] && g > 0, "region IV: G > 0 for m >= M0, l >= log 1.3247");
+  gm = Ghi(M0 - 1, l0[2], PI);
+  printf("   G(M0 - 1, log 1.3247) <= %.6f\n", gm*1.);
+  check(gm < 0, "region IV test is not vacuous (fails at M0 - 1)");
+  \\ sanity: the bound is attained in spirit by b = 3, eta_0 = rho, n(3) = 13 < M0
+  check(13 < M0, "n(3) = 13 < M0");
+  return(0);
+};
+
 run() = {
   my(PI);
   default(realprecision, 120);
   PI = pibr();
-  secA(); secB(PI); secG(PI); secD(PI); secE(PI); secH(PI); secF(PI);
-  printf("\nE139+E140 GATE: %s   (%d failures)\n", if(FAIL, "*** RED ***", "GREEN"), FAIL);
+  secA(); secB(PI); secG(PI); secD(PI); secE(PI); secH(PI); secI(PI); secF(PI);
+  printf("\nE139+E140+E152 GATE: %s   (%d failures)\n", if(FAIL, "*** RED ***", "GREEN"), FAIL);
   if(FAIL, quit(1));
   return(0);
 };

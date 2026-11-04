@@ -251,14 +251,14 @@ The dictionary from `C_4(Q)` back to `b`, the Mordell–Weil sieve experiments, 
 | `check-sweep-bounds.gp` | Sections 7-8 without floating point: the ranges of A and B (Lemma 8.1), the non-reciprocity step and Smyth's bound (Lemma 8.2), n(b) <= 495 at beta = 10^30 (Corollary 8.3, from an exact rational bracket for the plastic number), the box (13), the forty-prime sieve's survival rate, and rho^13 = eta_3, so n(3) = 13 and n(b) >= 13 forces b >= 3 or b <= -4 (the remark after Corollary 8.3). A second. |
 | `check-tuitman-diamond.gp` | E048 Phase 1, risk 2: does the C_4 model satisfy Tuitman's hypotheses (the plan's "(diamond)")?  THE HYPOTHESES, from the source (Tuitman I, arXiv:1402.6758v2, Section 2; Math |
 
-### Isomorphisms between the fields `K_b` (Section 10, Theorem E)
+### Isomorphisms between the fields `K_b` (Section 10, Theorem E and Theorem B(iv))
 
 Which powers of `eta_b` have the minimal polynomial of another `eta_c`, and hence when `K_b = K_c`. Both scripts work in exact integer and rational arithmetic; floating point only proposes a candidate (a root, an angle), which is then verified by a sign change or an interval inequality.
 
 | script | checks |
 | --- | --- |
 | `check-field-iso.gp` | E138: the integer roots of `P_m(b) = F_m(3(b+1), 3(b^2+b+1))` for `2 <= m <= 30` (only `b = -1` with `m = 4`, i.e. `eta_{-1}^4 = eta_5`), the powers of `eta_0` of family type for the six `b` with `n(b) >= 3` (`eta_0` is chosen exactly, as the `n(b)`-th root of `eta_b` of norm +1), and a `polredabs` collision search for `\|b\| <= 1000` with a positive control |
-| `check-two-logs.gp` | E139/E140: the exponents `m >= 31` for every `b != 0, 1`, through Laurent-Mignotte-Nesterenko, Theoreme 3 -- the identity, the constants of the angle lemmas, the three regions where the lower bound already excludes `m`, and the per-`b` continued-fraction certificate for all 325997 parameters with `\|b\| < 163000` (in two blocks for `b = -1`). About three minutes |
+| `check-two-logs.gp` | E139/E140: the exponents `m >= 31` for every `b != 0, 1`, through Laurent-Mignotte-Nesterenko, Theoreme 3 -- the identity, the constants of the angle lemmas, the three regions where the lower bound already excludes `m`, and the per-`b` continued-fraction certificate for all 325997 parameters with `\|b\| < 163000` (in two blocks for `b = -1`); and (E152) the region `m >= 6082138`, `log lambda >= log 1.3247` for an arbitrary unit `lambda > 1` (Proposition 10.20), which gives `n(b) < 6082138` for every `b` (Corollary 10.21, Theorem B(iv)), with a check that the corner `6082138 - 1` fails. About three minutes |
 
 ### The library
 
