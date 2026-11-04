@@ -1058,8 +1058,14 @@ def intersection_matrices(res, verbose=False, P=10):
 
 
 def genus_of_fibre(M, mult, genus):
-    """p_a of the closed fibre:  g - 1 = (1/2) sum m_i (2 p_a(Gamma_i) - 2 - Gamma_i^2).
-    Independent of the resolution, so a check that no singular point was missed."""
+    """1 + K.F/2 by adjunction:  g - 1 = (1/2) sum m_i (2 g_i - 2 - Gamma_i^2).
+    With g_i = p_a(Gamma_i) this is p_a of the closed fibre, which always equals
+    the genus of the generic fibre (flatness).  theta_genus() returns geometric
+    genera g_i = p_a(Gamma_i) - delta_i, so the value returned is
+    g - sum m_i delta_i: it equals g iff (M being right) every component is
+    regular.  Equality with g is therefore a check of M, and of the regularity
+    of every component, that does not depend on how the resolution was found.
+    (Until 2026-11-04 this docstring took the g_i to be arithmetic genera.)"""
     n = M.nrows()
     tot = sum(mult[i] * (2 * genus[i] - 2 - M[i, i]) for i in range(n))
     assert tot % 2 == 0, "odd K.F"
@@ -1126,8 +1132,14 @@ def different_exponent(base, abar, bbar):
 
 
 def theta_genus(res, lab):
-    r"""The arithmetic genus p_a = 1 - chi(O) over res.base.k of a component of
-    the closed fibre lying over the component E_lab of the base.
+    r"""The genus over res.base.k of the NORMALISATION of a component Theta of
+    the closed fibre lying over the component E_lab of the base, i.e. its
+    geometric genus.  This is p_a(Theta) = 1 - chi(O_Theta) exactly when Theta
+    is regular; a singular point of Theta lowers the value by its delta
+    invariant, because the different below is that of the extension of
+    function fields and does not see singular points.  genus_of_fibre() turns
+    these values into a regularity check (see there).  (Until 2026-11-04 this
+    docstring called the value p_a, which is wrong when Theta is singular.)
 
     e = 2, or Theta_lab split: Theta is isomorphic to E_lab (or is two copies
     of it), so p_a is that of E_lab.  Otherwise Theta -> E_lab is a degree 2
