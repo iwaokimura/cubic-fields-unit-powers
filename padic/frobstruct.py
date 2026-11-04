@@ -6,6 +6,10 @@ A_Z, i.e. equation (22) of
   *Explicit Chabauty-Kim for the split Cartan modular curve of level 13*,
   Annals of Math. 189 (2019), 885--944 (arXiv:1711.05846v1).
 
+Equation, section and lemma numbers in this module are those of arXiv v1
+unless marked otherwise.  In the Annals version (22) is (45) in §5.3,
+(17) is (27), and v1 Lemmas 5.4 and 5.5 are Annals Lemmas 5.5 and 5.7.
+
 §5.2 asks for an invertible matrix G with entries in H^0(]Y[, j^dagger O_Y)
 solving the gauge equation  Lambda_phi G + dG = G Lambda,  where (17) and its
 Frobenius pullback are
@@ -23,12 +27,12 @@ has exactly four nonzero blocks, and they read
     (2,1):  phi^*omega = F omega + df                       [defines F and f]
     (3,2):  dg^T = (phi^*omega)^T Z F - p omega^T Z
                  = omega^T (F^T Z F - pZ) + df^T Z F
-                 = df^T Z F                                 [by §4.1(a)]
+                 = df^T Z F                                 [by §4.4(a)]
     (3,1):  dh = (phi^*omega)^T Z f - g^T omega + phi^*eta - p eta
     (2,2), (3,3):  0 = 0.
 
 So (22) is reproduced verbatim -- unlike (19), which E071 had to correct --
-and §4.1(a), F^T Z F = pZ, is used exactly once, in the (3,2) block.  That is
+and §4.4(a), F^T Z F = pZ, is used exactly once, in the (3,2) block.  That is
 why E071 (Z is the CLASS Z_e M^-1, not the endomorphism) is a prerequisite:
 with the endomorphism matrix the (3,2) block does not close.
 
@@ -93,7 +97,8 @@ residue disk has none the port can reach, so (23) cannot start there at all;
 the gauge equation of (22) supplies the law that (23) is the fixed-point case
 of, and its bottom-left block is a tiny ITERATED integral.  That is what lets
 the Frobenius structure -- and with it theta -- be evaluated on C_4's leftover
-disk ](0,0)[ with the ORIGINAL base point, which Lemma 5.7 cannot do (E090).
+disk ](0,0)[ with the ORIGINAL base point, which Lemma 5.5 (Annals Lemma 5.7)
+cannot do (E090).
 See frob_triv_general.
 """
 
@@ -113,7 +118,7 @@ class FrobeniusStructure(object):
         The defaults are the ones E070-E074 use: the basis of phase4_basis()
         and the correspondence that Cohomology.correspondence_class builds from
         an automorphism of C_4.  A curve whose correspondences come from Hecke
-        operators has neither -- [BDM+19] §6.1 prints a basis and two matrices
+        operators has neither -- [BDM+19] §6.4 prints a basis and two matrices
         Z_1, Z_2 and says nothing about where a program should get them -- so
         all four are exposed (E076).  When reps is given, S must be given with
         it: it expresses the CLASSES of reps in the H1X basis, and it is what
@@ -122,7 +127,7 @@ class FrobeniusStructure(object):
 
         eta matters because §4.4 pins it only inside the span of the
         third-kind differentials omega_2g, ..., omega_2g+d-2, which is a CHOICE
-        that §6.1 does not print; E075 recovered [BDM+19]'s from the printed
+        that §6.4 does not print; E075 recovered [BDM+19]'s from the printed
         eta_{Z_i} themselves, and passing it here is what makes the Hodge side
         agree with the published beta_Fil and gamma_Fil.
         """
@@ -176,7 +181,7 @@ class FrobeniusStructure(object):
     def _rescale_Z(self):
         """Clear p from the denominator of eta by rescaling Z.
 
-        §4.1 pins Z only up to scale, and everything downstream -- eta, g, h,
+        §4.4 pins Z only up to scale, and everything downstream -- eta, g, h,
         c, and the height itself -- is LINEAR in Z, so a rescaling is a global
         normalisation of h_p and nothing more.  It is needed: on C_4 at p = 13
         the primitive integral class produced by correspondence_class() gives

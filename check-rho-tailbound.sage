@@ -501,8 +501,10 @@ def main():
     info("is the stronger one: every coefficient beyond the truncation must "
          "lie BELOW")
     info("THE RELIABILITY, v(d_n) >= max(m,0) + cap with cap = "
-         "min(cert, v(b) + v(lambda))")
-    info("E113's own.  A substitution s -> c + p s' with c in Z_p never lowers "
+         "min(cert, prec(b) + v(lambda)),")
+    info("prec(b) the absolute precision to which b is known (not v(b)) -- "
+         "E113's own.")
+    info("A substitution s -> c + p s' with c in Z_p never lowers "
          "a")
     info("valuation, so a tail below the reliability at the top is below it at "
          "every")

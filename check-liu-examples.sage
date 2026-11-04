@@ -8,9 +8,15 @@
 #       the elliptic component;
 #   (B) Example 2.12 of the paper -- the multiplicity lambda_m(B);
 #   (C) Tate's algorithm: Liu's algorithm is run on the Weierstrass double
-#       cover E -> P^1_x of elliptic curves at ell = 2 and 3 (both wild) and
-#       the closed fibre of the minimalized model is compared with the
-#       Kodaira type and the component group.
+#       cover E -> P^1_x of elliptic curves at ell = 2 (the wild case of
+#       Liu's algorithm) and ell = 3 (tame for the cover; the cases include
+#       wild reduction of E, 27a1 and 54a1) and the closed fibre of the
+#       minimalized model is compared with the Kodaira type and the
+#       component group.
+# The "fibre genus" checks evaluate genus_of_fibre with the geometric genera
+# of the components, i.e. g - sum m_i delta_i; this equals g iff M is right
+# and every component is regular.  (p_a of the closed fibre is g for every
+# model, so it would test nothing.)
 import sys
 # Run from the directory that holds liu-model-lib.sage (the repository
 # root); see the README.
@@ -104,11 +110,12 @@ check("n odd: (III)  no further blow-up over p_*",
       len([k for k in by if k.startswith('s=1|')]), 0)
 comps, Ms, good = analyse(res)
 check("n odd: at least one valid intersection matrix", len(good) >= 1, True)
-check("n odd: all valid matrices agree on (mult, Phi, p_a)",
+check("n odd: all valid matrices agree on (mult, Phi, fibre genus)",
       len(set((tuple(sorted(g[2])), tuple(g[5]['Phi']),
                genus_of_fibre(g[1], g[2], g[3])) for g in good)), 1)
 choice, M, mu, gen, cps, rep = good[0]
-check("n odd: p_a(closed fibre) = g = 2", genus_of_fibre(M, mu, gen), 2)
+check("n odd: fibre genus (geometric genera) = g = 2",
+      genus_of_fibre(M, mu, gen), 2)
 check("n odd: M m = 0, ker = Q m, negative semidefinite, minors",
       [rep['Mm'], rep['kernel_is_m'], rep['neg_semidef'], rep['minor_test']],
       [True] * 4)
@@ -116,11 +123,11 @@ check("n odd: the resolution is already minimal",
       len(contract_minus_ones(M, mu, gen, cps)[4]), 0)
 
 # --- Part (IV): n even ------------------------------------------------------
-# NOTE (recorded defect, see E128): for m ODD the
-# resolution below does not terminate in this implementation -- the
-# multiplicities of the exceptional divisors grow without bound, which
-# Lipman's theorem forbids, so it is a defect of the implementation.  The
-# cases run here are m = 0; C_4's own resolution does not enter that branch.
+# NOTE: m odd is treated in groups (A'') and (A3).  The resolution used to
+# stall there (E128 (i'); the stall was in depurate(), E129) and terminates
+# since E130.  Only m = 0 is run here, as the expected values below are the
+# paper's, which group (A') shows to fail for n = 4 and m odd; C_4's own
+# resolution does not enter the m-odd branch.
 for (n, m, lam2, thet3) in [(2, 0, 2, [2, 2]), (4, 0, 3, [1, 4])]:
     LC, res, by = ex310(n, m)
     check("n=%s: (IV)   lambda at p_0 = 3" % n, D(by, 's=0', 'lam_parent'), 3)
@@ -144,11 +151,12 @@ for (n, m, lam2, thet3) in [(2, 0, 2, [2, 2]), (4, 0, 3, [1, 4])]:
               [D(by, k3, 'abar'), D(by, k3, 'bbar')],
               [D(by, k3, 'abar').parent()(1), Xk ** 3 + GF(2)(m)])
     comps, Ms, good = analyse(res)
-    check("n=%s m=%s: all valid matrices agree on (mult, Phi, p_a)" % (n, m),
+    check("n=%s m=%s: all valid matrices agree on (mult, Phi, fibre genus)"
+          % (n, m),
           len(set((tuple(sorted(g[2])), tuple(g[5]['Phi']),
                    genus_of_fibre(g[1], g[2], g[3])) for g in good)), 1)
     choice, M, mu, gen, cps, rep = good[0]
-    check("n=%s m=%s: p_a(closed fibre) = g = 2" % (n, m),
+    check("n=%s m=%s: fibre genus (geometric genera) = g = 2" % (n, m),
           genus_of_fibre(M, mu, gen), 2)
     check("n=%s m=%s: M m = 0, ker = Q m, negative semidefinite, minors" % (n, m),
           [rep['Mm'], rep['kernel_is_m'], rep['neg_semidef'], rep['minor_test']],
@@ -170,7 +178,7 @@ print("\n(A') Example 3.10 (IV.3.2): lambda at p_3, from the paper's own equatio
 # odd, where it is 3 -- with ord(a) = 2 and ord(b) = 3 for the optimal
 # generator, so that Lemma 2.10(2a) applies (an initial form of odd degree is
 # not a square).  This is the branch on which our resolution of Example 3.10
-# does not terminate; see E128 (i').
+# used to stall (E128 (i')); it terminates since E130, see (A3).
 Bx = LiuBase(2); Sx, Tx = Bx.S, Bx.T
 chx = LiuChart(Bx, Sx ** 2 * (1 + Sx * Tx), {'S': 1, 'T': None})
 check("the chart of (IV.3.3) has ord(2) = 2", chx.d, 2)
@@ -282,7 +290,8 @@ print("\n(A3) Example 3.10 for m odd: E128 (i') closed (E130)")
 # answer by LiuChart.clean_below(), which rewrites a term only while its total
 # degree (or its exponent of S resp. T) is below a bound; one rewriting raises
 # that value by at least one, so it stops after boundedly many rounds.  The
-# branch now runs to the end, and the arithmetic genus checks it.
+# branch now runs to the end, and the fibre-genus check (M right, every
+# component regular; see genus_of_fibre) confirms it.
 for (n, m, ndiv, ncomp, mults) in [
         (4, 1, 13, 14, [1, 1, 2, 2, 2, 2, 4, 4, 6, 6, 8, 8, 10, 12]),
         (4, 3, 13, 14, [1, 1, 2, 2, 2, 2, 4, 4, 6, 6, 8, 8, 10, 12]),
@@ -295,7 +304,7 @@ for (n, m, ndiv, ncomp, mults) in [
           [len(res3.divs), len(comps3)], [ndiv, ncomp])
     check("n=%s m=%s: multiplicities of the closed fibre" % (n, m),
           sorted(good3[0][2]) if good3 else None, mults)
-    check("n=%s m=%s: p_a(closed fibre) = g = 2" % (n, m),
+    check("n=%s m=%s: fibre genus (geometric genera) = g = 2" % (n, m),
           genus_of_fibre(good3[0][1], good3[0][2], good3[0][3]) if good3 else None,
           2)
 # clean_below is what makes this terminate, and it is bounded by construction
@@ -362,7 +371,8 @@ for (lab, ell, kod) in CASES:
                    all_rational=True, point_degree=2)
     res = LC.resolution()
     comps, Ms, good = analyse(res)
-    check("%-7s ell=%s  all valid matrices agree on (mult, Phi, p_a)" % (lab, ell),
+    check("%-7s ell=%s  all valid matrices agree on (mult, Phi, fibre genus)"
+          % (lab, ell),
           len(set((tuple(sorted(g[2])), tuple(g[5]['Phi']),
                    genus_of_fibre(g[1], g[2], g[3])) for g in good)), 1)
     choice, M, mu, gen, cps, rep = good[0]
@@ -370,7 +380,7 @@ for (lab, ell, kod) in CASES:
     M2, mu2, g2, lb2, cont = contract_minus_ones(M, mu, gen, cps)
     rep2 = fibre_report(M2, vector(ZZ, mu2))
     em, ep = kod_expect(str(ld.kodaira_symbol()))
-    check("%-7s ell=%s  Kodaira %-4s: multiplicities, Phi, p_a"
+    check("%-7s ell=%s  Kodaira %-4s: multiplicities, Phi, fibre genus"
           % (lab, ell, ld.kodaira_symbol()),
           [sorted(mu2), rep2['Phi'], pa], [em, ep, 1])
 

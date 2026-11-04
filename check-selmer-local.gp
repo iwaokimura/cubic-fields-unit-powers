@@ -1,4 +1,4 @@
-\\ check-selmer-local.gp --- E118 spike: phases B and C of the TODO plan.
+\\ check-selmer-local.gp --- E118: phases B-E of the TODO plan.
 \\
 \\ Run: gp -q check-selmer-local.gp < /dev/null
 \\
@@ -7,21 +7,23 @@
 \\ last [GAP].  What it did NOT do is compute the number here.  The TODO block
 \\ "E118 候補" lays out a six-phase local computation (Stoll, Acta Arith. 98
 \\ (2001)); phase A -- the fields, the S-units, the dimensions -- was measured
-\\ on 2026-08-18/19.  THIS SCRIPT IS THE SPIKE THAT PLAN ASKED FOR: phases B
-\\ and C only, i.e.
+\\ on 2026-08-18/19.  THIS SCRIPT carries out phases B-E, i.e.
 \\
 \\   B.  build  H = ker( N : L(S,2)/K(S,2) -> K^x/(K^x)^2 ),  the group that
 \\       contains Sel^2 before any local condition is imposed;
-\\   C.  impose the ONE archimedean condition (K has a single real place),
+\\   C.  impose the ONE archimedean condition (K has a single real place);
+\\   D.  impose the condition at v | 3;
+\\   E.  impose the condition at v | 2,
 \\
-\\ and report the dimension.  The plan's own go/no-go, verbatim: "6-8 まで
-\\ 落ちれば残りは E だけで見通しは良い。15 のまま動かなければ設定のどこかが
-\\ 違うのでそこで止めて報告".  Phases D (v | 3) and E (v | 2) are NOT here.
+\\ ending in dim_F2 Sel^(2)(Jac X / K) = 4 in Stoll's H_K (= 5 inside
+\\ H^1(K, J[2])).  It began as the spike for B and C alone, with the plan's
+\\ go/no-go, verbatim: "6-8 まで落ちれば残りは E だけで見通しは良い。15 の
+\\ まま動かなければ設定のどこかが違うのでそこで止めて報告".
 \\
 \\ WHAT IS AND IS NOT INDEPENDENT.  Everything below is computed on this
 \\ machine.  But dim Sel = 5 is already known (E116), so this cannot be a blind
-\\ calibration; what the spike buys is (i) a decision about whether the
-\\ remaining two phases are worth the estimated 1.5-2 sessions, and (ii) the
+\\ calibration; what the script adds is (i) the local conditions at v | 3 and
+\\ v | 2 (phases D and E), which were first run here as a spike, and (ii) the
 \\ checks of groups 3 and 4, which do not know the answer: three 2-torsion
 \\ classes and two differences of K-rational points must land in H, must have
 \\ the right span, and must satisfy the real condition.
@@ -135,9 +137,14 @@ lam2(dl) =
 \\ 2J(K) if (dagger-dagger) holds OR there is no K-rational divisor class of
 \\ degree 1; otherwise 2J(K) has index 2 in it.  For g = 2, (dagger-dagger)
 \\ says the six zeros of f admit a Galois-stable partition into two
-\\ three-sets (Lemma 5.3).  Over K_{v_2} the orbits have sizes 2, 2, 2, so no
-\\ union of them has size 3 and (dagger-dagger) FAILS; and X(K_{v_2}) is
-\\ non-empty, so ker delta has dimension 1 and
+\\ three-sets (Lemma 5.3).  Over K_{v_2} f is a product of three irreducible
+\\ quadratics g_i (orbits 2, 2, 2); a stable partition must then take one
+\\ root from each pair, which needs the three K_{v_2}(sqrt disc g_i) to be one
+\\ and the same field (Stoll p. 257: L contains a quadratic extension of K).
+\\ They are not -- disc g_i disc g_j is a non-square in K_{v_2}, by a Hilbert
+\\ symbol, for two of the three pairs -- so (dagger-dagger) FAILS over K_{v_2},
+\\ hence also over K; and X(K_{v_2}) is non-empty, so ker delta has dimension
+\\ 1 and
 \\      dim Im mu_{v_2} = dim J(K_{v_2})/2J(K_{v_2}) - 1 = 8 - 1 = 7.
 \\ The same test passes at the other two places, which is why their targets
 \\ needed no correction and were met: over R all six roots are real, orbits
@@ -286,7 +293,7 @@ classof(dl) =
 
 
 {
-print("=== check-selmer-local.gp --- E118 spike: phases B and C ===");
+print("=== check-selmer-local.gp --- E118: phases B, C, D, E ===");
 
 \\ ============================================================ group 1
 print("(1) THE ETALE ALGEBRA L = K[x]/(f):  phase A, regressed");
@@ -792,9 +799,10 @@ info(Str("dim W_2 generated = ", dW2, "   (the target is ", dDK2, " + ", IMV2,
 \\ in the radical on ker N, since <c,d> = (c, N(d))_v.  So whatever we have
 \\ generated, W_2 is contained in the true preimage W, which is isotropic:
 \\      W  subset  W_2^perp ,   dim W_2^perp = 24 - dim W_2 .
-\\ With dim W_2 = 11 and dim W = 8 + 5 = 13 the two dimensions AGREE, so
-\\ W = W_2^perp exactly: the duality supplies the last two dimensions that
-\\ the search for divisors did not reach.
+\\ With dim W_2 = 11 this gives dim W_2^perp = 13, one more than
+\\ dim W = IMV2 + dDK2 = 7 + 5 = 12; W = W_2^perp is impossible anyway, since
+\\ an isotropic subspace for the invertible BB has dimension <= 24/2.  So
+\\ W/W_2 is an isotropic LINE in W_2^perp/W_2, enumerated below.
 BB = matrix(24, 24);
 for(i = 1, 3,
   my(Gi = gram(BN[i], P2[i], BS2[i])^-1, o = 8*(i-1));
@@ -807,35 +815,26 @@ check(mattranspose(W2)*BB*W2 == matrix(matsize(W2)[2], matsize(W2)[2]),
           "generator would almost surely break it"));
 W2P = matker(mattranspose(BB*W2));
 info(Str("dim W_2^perp = 24 - ", dW2, " = ", matrank(W2P)));
-\\ LOCAL DUALITY SUPPLIES THE LAST TWO DIMENSIONS.  Im mu_v is maximal
-\\ isotropic in H^1(K_v, J[2]) for the pairing <d,d'> = sum_w (d_w,d'_w)_w
-\\ [T: Poonen-Stoll], which in the symbol coordinates is x^T BB y; and the
-\\ diagonal K_v^x is in its radical on ker N, since <c,d> = (c, N(d))_v.  The
-\\ generated W_2 sits inside the true preimage W, and W is isotropic, so
-\\      W  subset  W_2^perp,   dim W_2^perp = 24 - 11 = 13 = 8 + 5 = dim W,
-\\ and the two coincide.  (An earlier run appeared to REFUTE this, with the
-\\ global classes failing the resulting condition; that was a stale variable --
-\\ dW2 was still 11 after the substitution, so two matrix-shape comparisons
-\\ were false for a reason with no mathematics in it.  Recorded because the
-\\ refutation was reported before it was checked.)
+\\ The generated W_2 sits inside the true preimage W, and W is isotropic, so
+\\      W  subset  W_2^perp,   dim W_2^perp = 24 - 11 = 13 > 12 = dim W;
+\\ the check below tests the inclusion on the global classes.  (An earlier run
+\\ appeared to fail it; that was a stale variable -- dW2 was still 11 after a
+\\ substitution, so two matrix-shape comparisons were false for a reason with
+\\ no mathematics in it.  Recorded because the failure was reported before it
+\\ was checked.)
 GL2chk = matrix(24, #GLD);
 for(n = 1, #GLD, GL2chk[,n] = lift(lam2(GLD[n])));
 GL2chk = Mod(GL2chk, 2);
 check(matrank(concat(W2P, GL2chk)) == matrank(W2P),
       Str("every global class lies in W_2^perp (dim ", matrank(W2P),
           ") -- necessary, since global classes lie in Im mu_{v_2}, and it "
-          "holds.  This is what the shortcut has to survive"));
-\\ ...AND THE SHORTCUT IS REFUTED AFTER ALL, this time for a reason with
-\\ mathematics in it.  Running the rest of the computation with W_2 = W_2^perp
-\\ returns dim Sel = 4, BELOW the lower bound rank_K + dim J(K)[2] = 3 + 2 = 5
-\\ that E046(b), E051 and E044(e) establish locally.  A local condition can
-\\ only be too strong or right, never too weak in a way that lowers the
-\\ answer past a proven bound, so W_2^perp is NOT the preimage of Im mu_{v_2}
-\\ despite having the right dimension.  The reason is visible a priori: BB is
-\\ invertible, so no subspace isotropic for x^T BB y can have dimension
-\\ 13 > 24/2, while the true preimage is isotropic of dimension 13.  Hence
-\\ the sum of local Hilbert symbols in these coordinates is not the pairing
-\\ of local duality, and finding the right one is the open problem of phase E.
+          "holds"));
+\\ HISTORY (superseded).  A first attempt took W = W_2^perp, on the belief
+\\ that dim W = 8 + 5 = 13, and found dim Sel = 4, apparently below a lower
+\\ bound 3 + 2 = 5.  Both numbers were wrong: dim ker delta_{v_2} = 1
+\\ (Lemma 5.1) makes dim W = 7 + 5 = 12, and in Stoll's H_K the lower bound
+\\ is 3 + 2 - 1 = 4 (see below).  BB IS the local pairing and is used below
+\\ to find W as an isotropic hyperplane of W_2^perp containing W_2.
 \\ The generated W_2 is kept: it is contained in Im mu_{v_2} for sure.
 dW2 = matrank(W2);
 Q2 = mattranspose(matker(mattranspose(W2)));
@@ -888,9 +887,10 @@ info(Str("candidates (isotropic, dimension 12, containing every global "
 \\ in H_K, which has dimension rank_K + dim J(K)[2] - dim ker delta_K
 \\ = 3 + 2 - 1 = 4: rank_K >= 3 is E046(b) and E051, dim J(K)[2] = 2 is
 \\ E044(e), and the 1 is Lemma 5.1 again, condition (dagger-dagger) failing
-\\ over K for the same reason as over K_{v_2} -- three Galois orbits of size
-\\ 2 admit no stable 3+3 partition -- with X(K) non-empty.  A candidate that
-\\ returns less than 4 is therefore NOT the true Im mu_{v_2}.
+\\ over K because it fails over K_{v_2} (see the top of the file: the three
+\\ quadratic factors share no quadratic extension) -- with X(K) non-empty.
+\\ A candidate that returns less than 4 is therefore NOT the true
+\\ Im mu_{v_2}.
 SURV = List();
 for(k = 1, #DSEL, if(DSEL[k] >= 4, listput(SURV, DSEL[k])));
 info(Str("of those, the ones compatible with the lower bound 4: ", #SURV,
@@ -921,8 +921,9 @@ printf("        dim_F2 Sel^2( Jac X / K )  =  %d\n", dselE);
 check(dselE == 4,
       Str("dim_F2 Sel^2(Jac X / K) = 4, computed entirely on this machine.  "
           "NB 4 and not 5: condition (dagger-dagger) FAILS over K too "
-          "-- the six roots fall into three Galois orbits of size 2 and admit "
-          "no stable 3+3 partition -- and X(K) is non-empty, so Lemma 5.1 "
+          "-- it already fails over K_{v_2}, where the three quadratic "
+          "factors share no quadratic extension -- and X(K) is non-empty, "
+          "so Lemma 5.1 "
           "gives dim ker delta_K = 1, so the group computed here -- Stoll's "
           "Sel^(2) inside H_K -- is smaller by exactly that one dimension "
           "than the Selmer group inside H^1(K, J[2]) that Magma reports.  "
@@ -930,13 +931,15 @@ check(dselE == 4,
 
 \\ ============================================================ group 7
 print("(7) THE BUDGET, AS A CHECK ON THE THREE CUTS");
-\\ For a place v of K, ker N inside L_v^x/(L_v^x)^2 K_v^x IS H^1(K_v, J[2]),
-\\ and Im mu_v = J(K_v)/2J(K_v) is a MAXIMAL ISOTROPIC subspace of it for the
-\\ cup-product pairing [T: Poitou-Tate local duality].  Hence
-\\      dim H^1(K_v, J[2]) = 2 dim Im mu_v ,
-\\ so the largest number of dimensions a place can cut is dim Im mu_v itself,
-\\ and by the local Euler characteristic
-\\      dim Im mu_v = dim J(K_v)[2] + g [K_v : Q_2] (the last term only v | 2).
+\\ For a place v of K, J(K_v)/2J(K_v) is a MAXIMAL ISOTROPIC subspace of
+\\ H^1(K_v, J[2]) for the cup-product pairing [T: Poitou-Tate local duality],
+\\ so dim H^1(K_v, J[2]) = 2 dim J(K_v)/2J(K_v), and by the local Euler
+\\ characteristic
+\\      dim J(K_v)/2J(K_v) = dim J(K_v)[2] + g [K_v : Q_2] (last term v | 2).
+\\ Its image Im mu_v in Stoll's H_v is (J(K_v)/2J(K_v))/ker delta_v (Lemma
+\\ 5.1): equal at R and v_3, one dimension smaller at v_2, where
+\\ (dagger-dagger) fails and X(K_{v_2}) is non-empty.  The most a place can
+\\ cut is dim Im mu_v.
 \\ dim J(K_v)[2] is read off the splitting type of f over K_v: with orbits of
 \\ local degrees d_1..d_r, the Galois-stable even subsets modulo {0, all} have
 \\ dimension r - 1 - [some d_w is odd].
@@ -971,8 +974,9 @@ info(Str("  + dim ker delta_K (Lemma 5.1, (ddagger) fails) = 1"));
 info(Str("  = dim_F2 Sel^2 in H^1(K, J[2])               = ", dselE + 1,
          "   <-- E116's Magma value, 5"));
 info(    "");
-info(Str("consequence: rank_K Jac X <= ", dselE, " - dim J(K)[2] + 1 = ",
-         dselE - 2 + 1, " = g, unchanged from E116"));
+info(Str("consequence: rank_K Jac X <= ", dselE,
+         " - dim J(K)[2] + dim ker delta_K = ", dselE - 2 + 1,
+         ", unchanged from E116"));
 print("========================================================================");
 printf("E118 GATE: phases B, C, D, E %s   (%d failures, %d open)\n",
        if(FAIL, "*** RED ***", "GREEN"), FAIL, OPEN);

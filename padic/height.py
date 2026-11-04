@@ -1,10 +1,15 @@
 r"""
 height --- E048 Phase 4, step (7): the local p-adic height itself, i.e.
-Lemma 5.4 of
+Lemma 5.5 of the published version (= Lemma 5.4 of arXiv v1) of
 
   J. S. Balakrishnan, N. Dogra, J. S. Mueller, J. Tuitman, J. Vonk,
   *Explicit Chabauty-Kim for the split Cartan modular curve of level 13*,
   Annals of Math. 189 (2019), 885--944 (arXiv:1711.05846v1).
+
+NB: equation and lemma numbers in this module are those of arXiv v1 unless
+stated otherwise; they differ in the published version.  In particular
+v1 Lemma 5.4 = Annals Lemma 5.5, v1 (14) = Annals (17) (the formula for
+h_p(M)), and v1 (17) = Annals (27) (the connection matrix Lambda).
 
 Everything that goes into it exists already: E068-E070 built the Hodge side
 (beta_Fil, gamma_Fil), E072 solved (22) and E073 turned it into the
@@ -15,8 +20,9 @@ functions on ]U[.  What this module adds is the assembly
              = gamma_phi(x) - gamma_Fil(x)
                - beta_phi^T s_1(alpha_phi)(x) - beta_Fil^T s_2(alpha_phi)(x),
 
-together with the two readings it needs, both of which the paper leaves to be
-reconstructed and one of which E070 got wrong.
+together with the two readings it needs, both of which arXiv v1 leaves to be
+reconstructed and one of which E070 got wrong.  (The published version makes
+both explicit: beta_Fil = (0,...,0,b_g,...,b_{2g-1})^T and N N^T = s_2.)
 
 WHAT s_1 AND s_2 ARE.  §3.3 defines them as the idempotents of V_dR cutting out
 s(V_dR/Fil^0) and Fil^0 V_dR.  The middle slot of A_Z is
@@ -77,8 +83,8 @@ G_x (s_0^{-1} s^Fil) are
 and the condition below reads g_x + gamma_Fil + ... regular.  So the solver's
 gamma is -gamma_Fil and its beta is -beta_Fil.
 
-THE CONDITION ITSELF, WHICH THE PAPER GETS WRONG.  Step (iii) of §4.5 asks for
-the first column above to be regular.  It need not be: Fil^0 A_Z is the
+THE CONDITION ITSELF, WHICH arXiv v1 GETS WRONG.  Step (iii) of v1 §4.5 asks
+for the first column above to be regular.  It need not be: Fil^0 A_Z is the
 subbundle of A_Z on X that maps ISOMORPHICALLY onto Fil^0 A_1 (the defining
 sequence is one of filtered connections and Fil^0 Q_p(1) = 0), so its generator
 over the Q_p-slot may first be reduced modulo the columns coming from
@@ -96,8 +102,13 @@ that, over Q and exactly, and finds that the pair produced by the printed
 condition fails it.
 
 This settles the question E071 left [OPEN]: QCMod's hodge.m does correct g_x by
-Omega^T Z s_2 Omega before step (iii), the paper does not, and the correction is
-right.  It was derived here before that code was consulted again.
+Omega^T Z s_2 Omega before step (iii), arXiv v1 does not, and the correction is
+right.  It was derived here before that code was consulted again.  The
+published version already has it: its §4.5 step (iii) and the proof of
+Theorem 4.11 use g_x + gamma_Fil - b_Fil^T N^T Omega_x - Omega_x^T Z N N^T
+Omega_x, with N N^T the projection s_2 onto Fil^0 V_dR.  (Corrected
+2026-11-04: earlier releases said "the paper" gets this wrong; only arXiv v1
+does.)
 """
 
 import copy
@@ -108,7 +119,7 @@ from padic.points import LocalExpansion
 
 
 class LocalHeight(object):
-    """theta(x) = h_p(A_Z(b,x)) of [BDM+19] Lemma 5.4, on ]U[."""
+    """theta(x) = h_p(A_Z(b,x)) of [BDM+19] Lemma 5.4 (v1) = 5.5, on ]U[."""
 
     def __init__(self, FS, base, fil0_correction=True, s1=None, s2=None,
                  prec=None, kmax=None, verbose=False):
@@ -121,7 +132,7 @@ class LocalHeight(object):
 
         s1, s2 default to the coordinate projections onto the first and last g
         coordinates.  They are exposed so that the gate can run E070's reading
-        as a negative control, and because §6.1.1 of [BDM+19] uses a
+        as a negative control, and because §6.4.1 of [BDM+19] uses a
         K-equivariant splitting rather than the one the basis defines.  They
         may be given over Q or over Q_p: the unit root splitting -- the one
         canonical K-equivariant choice, and the only one that needs no input
@@ -257,7 +268,7 @@ class LocalHeight(object):
         would drop (E073).
 
         Split out of theta_series for E077: the extensions E_1 and E_2 of
-        [BDM+19] \S6.1.1 are read off alpha_phi and beta_phi, and they are
+        [BDM+19] \S6.4.1 are read off alpha_phi and beta_phi, and they are
         needed on a whole disk, not just at a point.
         """
         FS = self.FS

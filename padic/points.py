@@ -28,8 +28,10 @@ E060 scope (good finite points over Q_p) is the case e = 1 with r(x(P)) a unit.
 Points at infinity -- t = 1/x, the b^inf basis -- are NOT implemented; they are
 a gap in the port, recorded as such, and are not needed for the rational points
 of C_4, whose four points at infinity are the roots of w^4 - 6w^2 + 27 and so
-are not Q-rational.  Nothing here silently does the wrong thing for them: the
-constructor classifies the point and refuses what it cannot do.
+are not Q-rational.  The constructor refuses a point flagged as infinite, and
+a point given by finite coordinates with ord_p(x(P)) < 0, which lies in an
+infinite (hence bad) residue disk.  (Until 2026-11-04 the second kind was
+accepted and classified as good.)
 
 THE RAMIFIED CASE, AND THE TRAP IT CARRIES.  Over an Eisenstein extension K of
 Q_p, Sage's ``valuation()`` counts powers of the uniformiser pi, not of p:
@@ -63,6 +65,11 @@ class CurvePoint(object):
                 "infinite points need t = 1/x and the b^inf basis: not ported "
                 "(see the SCOPE note in padic/points.py)")
         self.x = self.ring(x)
+        if self.x != 0 and self.vp(self.x) < 0:
+            raise NotImplementedError(
+                "x(P) is not p-integral: P lies in an infinite residue disk, "
+                "which needs t = 1/x and the b^inf basis: not ported "
+                "(see the SCOPE note in padic/points.py)")
         if b is not None:
             self.b = [self.ring(c) for c in b]
         else:
@@ -105,7 +112,12 @@ class CurvePoint(object):
         return self.inf or self.rval == 0
 
     def is_bad(self):
-        """In a bad residue disk: r(x(P)) is a non-unit, or P is infinite.
+        """In a bad residue disk: ord_p(r(x(P))) > 0, or P is infinite.
+
+        x(P) is integral here: a point given by finite coordinates with
+        ord_p(x(P)) < 0 lies in an infinite (hence bad) disk, which is out of
+        scope, and the constructor refuses it (until 2026-11-04 it was
+        accepted, and this test then called it good).
 
         The threshold is ord_p > 0 and NOT ord_p >= 1: the residue field of
         K = Q_p(p^{1/e}) is still F_p, so the residue disks are cut out by the
@@ -204,13 +216,16 @@ def teichmuller_point(P, iterations=None):
 
       Proof.  The x-coordinate of a fixed point satisfies x^p = x, and in a
       residue disk of Z_p (residue field F_p) that equation has the single
-      solution a; the iteration converges to it because x(P)^{p^k} differs from
-      a by p^{k+1} times a unit.  The fibre of the disk over x = a is the single
-      point (a,b), since dQ/dy(P) a unit makes Q(a,-) have exactly one root in
-      the disk (Hensel).  So there is at most one fixed point and it can only be
-      (a,b).  It IS fixed: evaluation at a good point is a ring homomorphism on
-      R^dagger ([BT] Prop 4.3 with Rmk 4.4), so applying it to the identity
-      Q^sigma(x^p, beta) = 0 gives Q(a^p, beta(a,b)) = Q(a, beta(a,b)) = 0;
+      solution a; the iteration converges to it because x(P)^{p^k} = a mod
+      p^{k+1} (for x(P) in Z_p; over a ramified K the valuation of the
+      difference still grows without bound).  The fibre of the disk over x = a
+      is the single point (a,b), since dQ/dy(P) a unit makes Q(a,-) have
+      exactly one root in the disk (Hensel).  So there is at most one fixed
+      point and it can only be (a,b).  It IS fixed: at a good point x(P) is
+      integral and r(x(P)) a unit, so every element of R^dagger converges at
+      P and evaluation is a ring homomorphism on R^dagger (cf. the proof of
+      [BT] Prop 4.5), so applying it to the identity Q^sigma(x^p, beta) = 0
+      gives Q(a^p, beta(a,b)) = Q(a, beta(a,b)) = 0;
       and beta = y^p mod p, so beta(a,b) = b^p = b in the residue field, the
       residue of b lying in F_p.  Hence beta(a,b) is a root of Q(a,-) in the
       disk, so equals b.  QED

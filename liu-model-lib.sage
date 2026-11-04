@@ -689,19 +689,24 @@ class Resolution:
         V(S) of the blow-up chart.  ``prec`` is the total degree below which
         the PARENT's a and b are exact (None: exact).
 
-        E129 (a).  The residues used here are read off the parent's a and b at
-        one single total degree: with r = [lambda/2] and the substitution
+        E129 (a).  The residues used here are read off the parent's a and b
+        in bounded total degree: with r = [lambda/2] and the substitution
         T -> S(T+theta), a monomial S^u T^v of a becomes S^{u+v}(T+theta)^v, so
-        the image of a_1 = a/S^r in A/(S) = k[X] is determined by the
-        coefficients of a in total degree exactly r, that of b_1 = b/S^{2r} by
-        those of b in total degree exactly 2r, and that of b_1/S by those in
-        total degree 2r+1.  Hence
+        the image of a_1 = a/S^r in A/(S) = k[X] comes from the monomials of a
+        in total degree r, that of b_1 = b/S^{2r} from those of b in total
+        degree 2r, and that of b_1/S from those in total degree 2r+1.  Here
+        the degree is the m-adic one: a coefficient divisible by ell^e adds
+        e*d, d = ord_m(ell), so when d = 1 a term ell*(total degree 2r) also
+        enters the residue of b_1/S (through clean_below()).  Such terms lie
+        below 2r+1 anyway.  Hence
 
-            prec > 2r+1 = lambda + 1   ==>   every candidate below is exact,
+            prec > 2r+1   ==>   every candidate below is exact,
 
-        and Prop. 3.1(5)(b) then bounds their degrees by r, 2r and 2r+1
-        respectively -- which is asserted, so a truncation that had corrupted
-        the residues would have to do so without raising the degree."""
+        2r+1 being lambda for odd lambda (the only case in which b_1/S is
+        read) and lambda + 1 for even lambda.  Prop. 3.1(5)(b) then bounds
+        their degrees by r, 2r and 2r+1 respectively -- which is asserted, so
+        a truncation that had corrupted the residues would have to do so
+        without raising the degree."""
         B = ch.base
         r = ZZ(lam_parent) // 2
         assert prec is None or prec > 2 * r + 1, (
@@ -812,7 +817,8 @@ class Resolution:
         #   (i)   Section 5.2 on E_lab itself (the singular points of THIS
         #         round's cover), Prop. 3.1(5b) bounding the degrees;
         #   (ii)  the zeros of the discriminant along E_lab: where Theta -> E
-        #         ramifies (which the arithmetic genus of Theta is read from)
+        #         ramifies (which the geometric genus of Theta, theta_genus(),
+        #         is read from)
         #         and where the two branches of a split Theta meet;
         #   (iii) Section 5.2 at the generic point of every component of
         #         Theta, for the double cover of the NEXT round (E129 (b2));
@@ -825,7 +831,7 @@ class Resolution:
         finite |= component_ram_points(B, abar, bbar)
         if self.next_cover:
             finite |= component_next_cover_points(ch0, 'S', a1, b1, uc0,
-                                                  prec=nd.abprec)
+                                                  prec=nd.abprec, r=r)
         if self.all_rational:
             for dgr in range(1, self.point_degree + 1):
                 for F in B.kT.polynomials(of_degree=dgr):
@@ -893,7 +899,12 @@ class Resolution:
 
 def normalize_over_line(base, a, b, verbose=False):
     """Section 5.1 at t = ell, for A = O[s] (a, b univariate over O).
-    Returns (a, b, c, r) with the new generator z = (y - c)/ell^r."""
+    Returns (a, b, c, r) with the new generator z = (y - c)/ell^r.
+
+    Inside the loop ctot is kept in the scale of the CURRENT generator
+    (y_cur = y/ell^scale - ctot), so it is multiplied by ell^scale on return.
+    (Until 2026-11-04 ctot was returned as it stood, which is right only when
+    r = 0 or c = 0 -- the two cases that occur for C_4 at ell = 2 and 3.)"""
     ell = base.ell
     Rs = a.parent()
     ctot = Rs(0)
@@ -912,11 +923,11 @@ def normalize_over_line(base, a, b, verbose=False):
             continue
         va, vb = val(a), val(b)
         if not (va > 0 and vb == 0 and ell == 2):
-            return (a, b, ctot, scale)
+            return (a, b, ctot * ell ** scale, scale)
         bb = _to_kpoly(base, b)
         c = _sqrt_kpoly(base, bb)
         if c is None:
-            return (a, b, ctot, scale)
+            return (a, b, ctot * ell ** scale, scale)
         cl = _lift_kpoly(base, c, Rs)
         if verbose:
             print("    normalize: y -> y - (%s)" % cl)
@@ -1074,7 +1085,8 @@ def genus_of_fibre(M, mult, genus):
 
 def fibre_report(M, mult):
     """the standard battery: M*m = 0, kernel exactly Q*m, negative
-    semidefinite, |det M^(i)| = |Phi| m_i^2, and Phi = Z^n/im(M)."""
+    semidefinite, |det M^(i)| = |Phi| m_i^2, and Phi = the torsion of
+    Z^n/im(M) (= ker(m^T)/im(M); Z^n/im(M) itself has rank 1)."""
     n = M.nrows()
     rep = {}
     rep['symmetric'] = (M == M.transpose())
@@ -1142,9 +1154,11 @@ def theta_genus(res, lab):
     docstring called the value p_a, which is wrong when Theta is singular.)
 
     e = 2, or Theta_lab split: Theta is isomorphic to E_lab (or is two copies
-    of it), so p_a is that of E_lab.  Otherwise Theta -> E_lab is a degree 2
-    cover and Riemann-Hurwitz gives p_a(Theta) = 2 p_a(E_lab) - 1 + deg(d)/2,
-    the different being read off the local equations at the closed points of
+    of it), so its genus is that of E_lab.  Otherwise Theta -> E_lab is a
+    degree 2 cover and Riemann-Hurwitz for the function fields gives the
+    geometric genus g(Theta~) = 2 g(E_lab~) - 1 + deg(d)/2 (the key
+    'base_pa' holds the geometric genus g(E_lab~), despite its name), the
+    different being read off the local equations at the closed points of
     E_lab that the resolution visited.  A purely inseparable cover has no
     different and is handled through its function field, which is well defined
     because the local equations differ from chart to chart only by squares."""
@@ -1181,7 +1195,17 @@ def theta_genus(res, lab):
 
 def contract_minus_ones(M, mult, genus, labels=None, verbose=False):
     """Castelnuovo: contract components with self-intersection -1 and
-    arithmetic genus 0, until none is left."""
+    genus 0, until none is left.  The callers pass geometric genera
+    (theta_genus()); these are the arithmetic genera that Castelnuovo's
+    criterion needs only if every component is regular, i.e. only if
+    genus_of_fibre(M, mult, genus) == g.
+
+    Scope: M holds intersection numbers over k.  An exceptional curve whose
+    field of constants k' has degree f > 1 over k has self-intersection -f,
+    not -1 (every intersection number with it is divisible by f), and its
+    contraction would need a division by f.  Such curves are NOT contracted
+    here, so with them the result need not be minimal; a component with
+    M[i,i] = -1 has f = 1, and for it the formula below is the right one."""
     M = matrix(ZZ, M)
     mult = list(mult)
     genus = list(genus)
@@ -1677,7 +1701,17 @@ def epoints_over(node, nbranch=None, P=16, verbose=False):
 
 
 def local_split(base, abar, bbar):
-    """Is Y^2 + abar Y + bbar reducible over k[[X]]?  (k perfect.)"""
+    """Is Y^2 + abar Y + bbar reducible over k[[X]]?  (k perfect.)
+
+    ell = 2, abar != 0: with Y = abar Z this is the Artin-Schreier equation
+    Z^2 + Z = g, g = bbar/abar^2 in k((X)), and a root in k((X)) is integral.
+    If g has a pole of odd order there is no root.  A pole of even order 2n
+    with leading coefficient c is removed by Z -> Z + sqrt(c) X^{-n}, which
+    leaves a pole of order < 2n; and once g is regular at 0, Hensel's lemma
+    (the derivative is 1) gives a root iff Tr_{k/F_2} g(0) = 0.  (Until
+    2026-11-04 every pole was treated as odd; that answered False for
+    Y^2 + XY + 1 + X = (Y + 1)(Y + X + 1).  The runs behind the paper never
+    reached that branch.)"""
     kT = base.kT
     abar, bbar = kT(abar), kT(bbar)
     if base.ell != 2:
@@ -1690,16 +1724,24 @@ def local_split(base, abar, bbar):
         return (D >> v)[0].is_square()
     if abar == 0:
         return _sqrt_kpoly(base, bbar) is not None
-    va = abar.valuation()
     if bbar == 0:
         return True
-    vb = bbar.valuation()
-    if vb < 2 * va:
-        return False
-    if vb > 2 * va:
-        return True
-    c = (bbar >> vb)[0] / ((abar >> va)[0]) ** 2
-    return c.trace() == 0
+    kX = kT.fraction_field()
+    X = kX(kT.gen())
+    g = kX(bbar) / kX(abar) ** 2
+    while True:
+        if g == 0:
+            return True
+        num, den = g.numerator(), g.denominator()
+        vn, vd = num.valuation(), den.valuation()
+        n2 = vd - vn                      # order of the pole at X = 0
+        lead = (num >> vn)[0] / (den >> vd)[0]
+        if n2 <= 0:
+            return (lead.trace() == 0) if n2 == 0 else True
+        if n2 % 2 == 1:
+            return False
+        w = lead.sqrt() * X ** (-(n2 // 2))
+        g = g - w ** 2 - w
 
 
 def normalize_chart(chart, a, b, coords=('S', 'T'), verbose=False, secs=(),
@@ -1875,7 +1917,8 @@ def ucov_valuations(ep, kappas=(0, 1, -1, 2, -2, 3, -3),
 def branch_gluings(res1, eps):
     """Split components of the round-1 fibre carry a local branch index at
     each point, assigned chart by chart.  Fix them by the fingerprint
-    nu_Gamma(u - kappa t^j) where it separates the two branches, and report
+    nu_Gamma(u - kappa ell^j t^i) (ucov_valuations()) where it separates the
+    two branches, and report
     the remaining freedom: one Z/2 per node beyond the first, per component."""
     for ep in eps:
         if not hasattr(ep, 'fp'):
@@ -1932,7 +1975,8 @@ def round2(res1, P=10, verbose=False, flips=None, eps=None):
     comps1 = fibre_components(res1)
     # The local branch index of a split component of the round-1 fibre is
     # assigned chart by chart and need not be consistent.  Identify the
-    # branches by nu_Gamma(u - kappa), a valuation on K(Z) and so independent
+    # branches by nu_Gamma(u - kappa ell^j t^i) (ucov_valuations()), a
+    # valuation on K(Z) and so independent
     # of the chart; then relabel.
     apply_gluing(res1, eps, flips)
     lab = {c: i for i, c in enumerate(comps1)}
@@ -2067,8 +2111,9 @@ def point_components(res2, comps2, P=10):
 
 def round2_search(res1, g, P=10, verbose=False):
     """Run round 2 over all gluings of the branch labels that the fingerprint
-    does not fix, and keep the models that pass the standard battery and have
-    the right arithmetic genus."""
+    does not fix, and keep the models that pass the standard battery and for
+    which genus_of_fibre() returns g (M consistent and every component
+    regular; the arithmetic genus of the closed fibre is g in any case)."""
     eps = make_epoints(res1, P=P, verbose=verbose)
     fixed, free = branch_gluings(res1, eps)
     keys = []
@@ -2144,8 +2189,9 @@ def component_ram_points(base, abar, bbar):
     psi^{-1}(E) -> E ramifies, or over which the two branches of a split
     psi^{-1}(E) meet: the zeros of the discriminant abar^2 - 4 bbar (in
     characteristic 2 the zeros of abar).  Both are needed even when no point
-    there is singular -- the first because the arithmetic genus of the
-    component is read off the different at the visited points, the second
+    there is singular -- the first because the geometric genus of the
+    component (theta_genus()) is read off the different at the visited
+    points, the second
     because the self-intersection of a split Theta is.
 
     An identically vanishing discriminant returns the empty set: then either
@@ -2197,9 +2243,12 @@ class GenericComponent:
     Gamma of psi^{-1}(E), E = V(g) being a component of the closed fibre of
     ``chart`` (g = S or T) and X the remaining coordinate."""
 
-    def __init__(self, chart, coord, a1, b1, kind, root=None):
+    def __init__(self, chart, coord, a1, b1, kind, root=None, levcap=None):
         B = chart.base
         self.chart, self.coord, self.B, self.R = chart, coord, B, chart.R
+        # levcap: residues of a1, b1 (and of anything built from them) are
+        # exact at the levels n < levcap along the component; None = exact.
+        self.levcap = levcap
         self.g = B.S if coord == 'S' else B.T
         self.gi = 0 if coord == 'S' else 1
         self.other = B.T if coord == 'S' else B.S
@@ -2243,6 +2292,9 @@ class GenericComponent:
         """the image of z/g^n in A/(g) = k[X]; 0 when nu_E(z) > n.
         E130: cleaning only the terms of g-exponent < n terminates, and if
         nu_E(z) >= n it leaves no term below n at all."""
+        assert self.levcap is None or n < self.levcap, (
+            "a residue at level %s was asked, but a_1 and b_1 are exact only "
+            "below level %s along the component" % (n, self.levcap))
         z = self.chart.clean_below(self.R(z), self.gi, n + 1)
         if z == 0:
             return self.B.kT(0)
@@ -2511,7 +2563,8 @@ class GenericComponent:
             if not self.kis_zero(Dbar):
                 # Section 5.2 (1): the multiple factors of the discriminant.
                 # All of its factors are kept: the simple ones are where the
-                # next cover ramifies, which its arithmetic genus needs.
+                # next cover ramifies, which its geometric genus
+                # (Riemann-Hurwitz) needs.
                 kind, wit = '(1)', Dbar
                 out |= self.kzeros(Dbar)
             else:
@@ -2540,25 +2593,35 @@ class GenericComponent:
 
 
 def component_next_cover_points(chart, coord, a1, b1, ucov, prec=None,
-                                verbose=False):
+                                r=None, verbose=False):
     r"""Section 5.2 at the generic point of every component of psi^{-1}(E),
     E = V(coord) of ``chart``, for the double cover w^2 = u of the next round
     given by ucov = (nu1, nu0, den).  Returns a set of monic irreducible
     polynomials in k[X]: the closed points of E below the candidates.
 
-    ``prec`` is the total degree below which a1 and b1 are exact; the residues
-    used here are read at level 0 and 1 along the component, so it is only
-    asserted to be at least 2."""
-    assert prec is None or prec >= 2, \
-        "a_1 and b_1 are exact only below total degree %s" % prec
-    gcs = component_generic_objects(chart, coord, a1, b1)
+    ``prec`` is the total degree below which the PARENT's a and b are exact
+    (as for _sing_candidates(); the caller passes nd.abprec).  A residue at
+    level n along the component comes from the parent's coefficients in
+    total degree r+n (for a) and 2r+n (for b), r = [lambda/2], and
+    normalise_next() and vr() may read levels above 1, so the assertion
+    prec >= 2 below does not by itself make these residues exact.  The
+    stronger prec > 2r+1 assertion of _sing_candidates(), run on the same
+    node first, covers levels 0 and 1.  Every level is checked as it is read:
+    with ``r`` given, a residue at level n is exact iff 2r+n < prec (the
+    condition for b_1, which implies the one for a_1), and
+    GenericComponent.resid() asserts n < prec - 2r.  (Until 2026-11-04 only
+    prec >= 2 was asserted; no run behind the paper had prec set here.)"""
+    assert prec is None or r is not None, \
+        "a truncated parent needs r to bound the levels read"
+    levcap = None if prec is None else prec - 2 * r
+    gcs = component_generic_objects(chart, coord, a1, b1, levcap=levcap)
     out = set()
     for gc in gcs:
         out |= gc.next_cover_candidates(ucov, verbose=verbose)
     return out
 
 
-def component_generic_objects(chart, coord, a1, b1):
+def component_generic_objects(chart, coord, a1, b1, levcap=None):
     r"""The components of psi^{-1}(E), E = V(coord), as GenericComponent
     objects: one 'ram' when abar = bbar = 0, one 'inert' when Y^2+abar Y+bbar
     is irreducible over k(X), two 'split' otherwise (Prop. 3.7)."""
@@ -2567,14 +2630,16 @@ def component_generic_objects(chart, coord, a1, b1):
     abar, bbar = red(chart.R(a1)), red(chart.R(b1))
     KX = FractionField(B.kT)
     if abar == 0 and bbar == 0:
-        return [GenericComponent(chart, coord, a1, b1, 'ram')]
+        return [GenericComponent(chart, coord, a1, b1, 'ram', levcap=levcap)]
     Yv = PolynomialRing(KX, 'Y').gen()
     pol = Yv ** 2 + KX(abar) * Yv + KX(bbar)
     assert all(e == 1 for _, e in pol.factor()), \
         "the cover is not reduced along the component: %s" % pol
     if pol.is_irreducible():
-        return [GenericComponent(chart, coord, a1, b1, 'inert')]
-    gcs = [GenericComponent(chart, coord, a1, b1, 'split', root=r)
+        return [GenericComponent(chart, coord, a1, b1, 'inert',
+                                 levcap=levcap)]
+    gcs = [GenericComponent(chart, coord, a1, b1, 'split', root=r,
+                            levcap=levcap)
            for r, _ in pol.roots()]
     assert len(gcs) == 2, "a split component with %s branches" % len(gcs)
     return gcs

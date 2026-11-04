@@ -15,8 +15,10 @@ Math. Comp. 85 (2016), 961--981 (arXiv:1402.6758v2).
 
 Two Newton iterations run side by side: alpha inverts r^sigma(x^p), and beta
 solves Q^sigma(x^p, -) = 0 starting from y^p, with s alpha in place of the
-derivative's inverse -- which is what makes the second iteration usable, since
-1/(dQ/dy) is not in the ring but s/r is.
+derivative's inverse: 1/(dQ/dy) = s/r with s in A (Proposition 2.4), so
+s^sigma(x^p, beta) times alpha -- the approximation to F_p(1/r) that the first
+iteration is already computing -- gives the inverse derivative at beta without
+any division.
 
 n = 1 ONLY: sigma is the identity here (see padic/radic.py).  Every place where
 sigma would act is marked in the code.
@@ -57,7 +59,10 @@ class FrobeniusLift(object):
         for i in range(self.iterations):
             # alpha_{i+1} = alpha_i (2 - alpha_i r(x^p))
             alpha = RR.mul(alpha, RR.sub(two, RR.mul(alpha, self.rxp)))
-            # beta_{i+1} = beta_i - Q(x^p, beta_i) s(x^p, beta_i) alpha_i
+            # beta_{i+1} = beta_i - Q(x^p, beta_i) s(x^p, beta_i) alpha_{i+1}
+            # with the alpha just updated, not Theorem 2.6's alpha_i; the
+            # better inverse does not slow the iteration, and check_beta
+            # verifies the limit.
             Qb = RR.subst_xp_A(RR.Qy, beta)
             sb = RR.subst_xp_A(RR.s, beta)
             beta = RR.sub(beta, RR.mul(RR.mul(Qb, sb), alpha))

@@ -49,17 +49,35 @@ from padic.points import CurvePoint, LocalExpansion, ramification_index
 
 # --------------------------------------------------------------- precision
 
+def _floorlog(n, p):
+    """floor(log_p(n)) for an integer n >= 1, exactly.  (Until 2026-11-04 this
+    was floor(log(float(n), float(p))), which is m - 1 at some exact powers
+    n = p^m: log(3.0**5, 3.0) = 4.999...)"""
+    n, p = ZZ(n), ZZ(p)
+    m, q = ZZ(0), p
+    while q <= n:
+        m += 1
+        q *= p
+    return m
+
+
 def _phi(i, e, p):
     """i/e - floor(log_p(i+1)), the summand of Proposition 4.1."""
-    return QQ(i) / e - ZZ(floor(log(float(i + 1), float(p))))
+    return QQ(i) / e - _floorlog(i + 1, p)
 
 
-def _phi_min_from(l, e, p, mmax=64):
+def _phi_min_from(l, e, p, mmax=200):
     """min_{i >= l} phi(i), computed exactly rather than by scanning.
 
-    phi decreases only where floor(log_p(i+1)) jumps, i.e. at i = p^m, so the
-    minimum over i >= l is attained at i = l or at one of those jump points;
-    and phi(p^m) = p^m/e - m grows without bound, so finitely many matter.
+    phi decreases only where floor(log_p(i+1)) jumps, i.e. at i + 1 = p^m,
+    i = p^m - 1, and increases by 1/e at every other step; so the minimum over
+    i >= l is attained at i = l or at one of those jump points, and
+    phi(p^{m+1} - 1) - phi(p^m - 1) = p^m (p - 1)/e - 1 is >= 0 as soon as
+    p^m (p - 1) >= e, and increasing in m from then on, so the scan stops at
+    the first jump point beyond l with that property.  (Until 2026-11-04 this evaluated i = p^m, one step too late,
+    which overstates the minimum by 1/e when it falls at a jump; at the
+    parameters of the paper -- p = 13, e = 1 and e = 104, N = 12, ..., 22 --
+    the truncation tprec_for() and nu1 were unaffected.)
     (E060's version scanned a fixed window of 4p+20 terms.  That is correct for
     e = 1 and WRONG for e = 23, where the next jump can lie hundreds of terms
     away -- the kind of silent under-estimate this port cannot afford.)
@@ -67,12 +85,12 @@ def _phi_min_from(l, e, p, mmax=64):
     best = _phi(l, e, p)
     m = 1
     while m <= mmax:
-        i = ZZ(p)**m
+        i = ZZ(p)**m - 1
         if i > l:
             v = _phi(i, e, p)
             if v < best:
                 best = v
-            if QQ(i) / e - m > best + 1:
+            if ZZ(p)**m * (p - 1) >= e:
                 break
         m += 1
     return best
@@ -103,7 +121,7 @@ def prop41_precision(p, N, e, l, k, ordtP, ordtQ):
     nu2 = N + min(_phi(i, e, p) for i in range(0, max(l, 1)))
     out = min(nu1, nu2)
     if k >= 2:
-        nu3 = N - k * max(ordtP, ordtQ) - ZZ(floor(log(float(k - 1), float(p))))
+        nu3 = N - k * max(ordtP, ordtQ) - _floorlog(k - 1, p)
         out = min(out, nu3)
     return out
 

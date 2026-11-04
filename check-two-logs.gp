@@ -113,7 +113,7 @@ secB(PI) = {
   \\ (B): |RHS| <= 6 Lam^-1/2 + 10 Lam^-1 <= 7 Lam^-1/2 for Lam >= 100;  r <= 3.5 Lam^-1/2;  eps <= 3.5/0.815 <= 4.3
   check((7/2)/(815/1000) <= 43/10, "3.5/0.815 <= 4.3");
   check(3*(43/10) <= 13, "3 * 4.3 <= 13");
-  \\ (E): m = 1, lam >= 3e8 (|b| >= 10^4): r <= 3 lam^-1/2 + 5 lam^-1, crude: pi r <= 0.1
+  \\ (E): m = 1, lam > 10^8 (|b| >= 10^4, as lam >= T - 2 >= 3b^2 - 3|b| + 1): r <= 3 lam^-1/2 + 5 lam^-1, crude: pi r <= 0.1
   check(PI[2]*(3 + 5/10^4)/10^4 < 1/10, "(E) crude step, lam >= 1e8");
   \\ eps |b| <= (3/0.815)(1 + 5/3 lam^-1/2) / sqrt(3 (1 - 1/N)) with N >= 10^4; compare squares
   ok = ((3/(815/1000))*(1 + 5/(3*10^4)))^2 <= (213/100)^2 * 3*(1 - 1/10^4);
@@ -245,7 +245,7 @@ secG(PI) = {
   r = cosbr(PI[1]/3); check(r[2] >= 1/2, "cos(pi_lo/3) >= 1/2 enclosed from above");
   L2 = logbr(2); check(L2[1] < 6931471805599454/10^16 && L2[2] > 6931471805599453/10^16, "log 2 bracket sane");
   check(L2[2] - L2[1] < 1/10^50, "log 2 bracket narrow");
-  \\ planted: a theta with ||113 theta|| ~ 1e-40 must NOT be certified
+  \\ planted: theta = 355/113 + 1e-40, so ||113 theta|| ~ 1.1e-38, must NOT be certified
   c = cfcert(355/113 + 1/10^40, 355/113 + 1/10^40 + 1/10^60, 10, PI);
   check(c[1] == 0, "planted near-rational theta (q = 113) is rejected");
   \\ planted: a 'generic' theta (sqrt 2 interval) must be certified at lam = 10

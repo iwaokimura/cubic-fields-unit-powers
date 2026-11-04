@@ -46,8 +46,10 @@
 \\                  which is what kills it for small q.
 \\
 \\ They overlap on a band of q and are REQUIRED to agree there -- that is the
-\\ calibration, and it is a genuine one: the two share the range bounds and nothing
-\\ else (one works with polynomials over F_p, the other with integers).
+\\ calibration of the candidate generation, which is independent in the two
+\\ (polynomials over F_p versus integer recursions).  They do share the range
+\\ bounds, the mod-3 filter admisA and the final acceptance test accept(), so a
+\\ bug in admisA or accept() would not be caught by the agreement.
 \\
 \\ A sieve produces only false positives, and the direct search is exhaustive, so
 \\ in both engines "no b other than those listed" is exact on the range.

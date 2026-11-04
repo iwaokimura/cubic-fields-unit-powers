@@ -71,6 +71,31 @@ def L_from_places(Qxy, p, g):
     return RT(coeffs)
 
 
+def frobenius_certified(C, H, p, N, need, g, step=4, cap=40):
+    """FrobeniusMatrix at the least N >= the given one (in steps of `step`)
+    for which chi(T) is CERTIFIED to p^need.  The certified precision of chi
+    is that of Phi minus (2g-1)(-ord_p(Phi)) when ord_p(Phi) < 0 (Tuitman,
+    Remark 4.5); needed_precision() alone assumes ord_p(Phi) >= 0, which
+    fails for y^2 = x^7 - 1 at p = 5 in this basis (ord_p(Phi) = -1).
+    Until 2026-11-04 N was not raised and the precision of chi was taken to
+    be that of Phi."""
+    N0 = N
+    while True:
+        FM = FrobeniusMatrix(C, H, p, N)
+        FM.compute()
+        cchi, vphi = FM.chi_certified_precision()
+        if cchi >= need:
+            if N > N0:
+                print("       ord_p(Phi) = %d: N raised from %d to %d so that "
+                      "chi is certified to p^%d (Tuitman Rem. 4.5)"
+                      % (vphi, N0, N, need))
+            return FM, N
+        if N >= N0 + cap:
+            raise ArithmeticError("no N <= %d certifies chi to p^%d"
+                                  % (N, need))
+        N += step
+
+
 def gate_A(label, Qxy, g, fpoly, primes, Nslack):
     ok = True
     for p in primes:
@@ -78,7 +103,7 @@ def gate_A(label, Qxy, g, fpoly, primes, Nslack):
         C = TuitmanCurve(Qxy, name=label)
         H = Cohomology(C)
         N = needed_precision(p, g) + Nslack
-        FM = FrobeniusMatrix(C, H, p, N)
+        FM, N = frobenius_certified(C, H, p, N, needed_precision(p, g), g)
         chi, worst = FM.chi()
         chiZ = RT(list(chi))
         truth = L_from_places(Qxy, p, g)
@@ -98,7 +123,7 @@ def gate_A(label, Qxy, g, fpoly, primes, Nslack):
               % (rep["finite_loss"], rep["infinite_loss"], rep["remainder"],
                  N, rep["solve_residual"]))
         weil = FM.weil_check(chi)
-        print("       chi certified to p^%s by Prop 3.7/3.8, needs p^%s %s; "
+        print("       chi certified to p^%s by Prop 3.7/3.8 and Rem 4.5, needs p^%s %s; "
               "Weil bounds %s;  %.1f s"
               % (worst, need,
                  "ok" if worst >= need else "*** UNDETERMINED ***",
@@ -161,7 +186,7 @@ def gate_B(primes, Nslack):
         C = TuitmanCurve(Qxy, name=label)
         H = Cohomology(C)
         N = needed_precision(p, g) + Nslack
-        FM = FrobeniusMatrix(C, H, p, N)
+        FM, N = frobenius_certified(C, H, p, N, needed_precision(p, g), g)
         chi, worst = FM.chi()
         chiZ = RT(list(chi))
         truth = L_from_places(Qxy, p, g)
@@ -193,7 +218,7 @@ def gate_B(primes, Nslack):
               % (rep["finite_loss"], rep["infinite_loss"], rep["remainder"],
                  N, rep["solve_residual"]))
         weil = FM.weil_check(chi)
-        print("       chi certified to p^%s by Prop 3.7/3.8, needs p^%s %s; "
+        print("       chi certified to p^%s by Prop 3.7/3.8 and Rem 4.5, needs p^%s %s; "
               "Weil bounds %s;  %.1f s"
               % (worst, need,
                  "ok" if worst >= need else "*** UNDETERMINED ***",

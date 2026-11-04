@@ -12,7 +12,9 @@
 #
 # Groups:
 #   (C) round 1 at ell = 2 and 3 against PARI/Sage's Tate algorithm;
-#   (E) round 2 at ell = 2: components, multiplicities, Phi, arithmetic genus;
+#   (E) round 2 at ell = 2: components, multiplicities, Phi, and the fibre
+#       genus from the geometric genera (g - sum m_i delta_i: M right and
+#       every component regular);
 #   (F) the contraction of the two (-1)-curves against Magma's model
 #       (report of section E103), matrix and multiplicities;
 #   (G) the reduction of the nine rational points, to the point and not only
@@ -117,7 +119,7 @@ for ell, kod, tam, phi, mults in [(2, 'I2*', 4, [2, 2], [1, 1, 1, 1, 2, 2, 2]),
     check("ell=%s: Phi(E) from our model" % ell, rep1['Phi'], phi)
     check("ell=%s: all components are rational curves" % ell, gen1,
           [0] * len(gen1))
-    check("ell=%s: p_a(closed fibre) = g(E) = 1" % ell,
+    check("ell=%s: fibre genus (geometric genera) = g(E) = 1" % ell,
           genus_of_fibre(M1, mu1, gen1), 1)
     check("ell=%s: M symmetric, M m = 0, ker = Q m, negative semidefinite" % ell,
           [rep1['symmetric'], rep1['Mm'], rep1['kernel_is_m'],
@@ -140,7 +142,8 @@ check("multiplicities", sorted(mu2), [1, 1, 1, 2, 2, 2, 2, 4])
 check("three components of multiplicity 1",
       len([m for m in mu2 if m == 1]), 3)
 check("all components are rational curves", gen2, [0] * len(gen2))
-check("p_a(closed fibre) = g(C_4) = 3", genus_of_fibre(M2, mu2, gen2), 3)
+check("fibre genus (geometric genera) = g(C_4) = 3",
+      genus_of_fibre(M2, mu2, gen2), 3)
 check("component group Phi_2", rep2['Phi'], [8])
 check("M symmetric, M m = 0, ker = Q m, negative semidefinite",
       [rep2['symmetric'], rep2['Mm'], rep2['kernel_is_m'], rep2['neg_semidef']],
@@ -271,7 +274,7 @@ ch3, M3, mu3, gen3, cps3, rep3 = good3[0]
 check("ell=3: number of components", len(cps3), 7)
 check("ell=3: multiplicities", sorted(mu3), [1, 1, 1, 1, 1, 2, 2])
 check("ell=3: all components are rational curves", gen3, [0] * len(gen3))
-check("ell=3: p_a(closed fibre) = g(C_4) = 3",
+check("ell=3: fibre genus (geometric genera) = g(C_4) = 3",
       genus_of_fibre(M3, mu3, gen3), 3)
 check("ell=3: Phi_3 (section E125: Z/2 x Z/2 x Z/4, order 16)",
       rep3['Phi'], [2, 2, 4])

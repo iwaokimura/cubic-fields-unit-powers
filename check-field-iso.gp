@@ -20,7 +20,8 @@
 \\      Newton-identity computation); integer roots of P_m for 2 <= m <= MMAX.
 \\      A root b with b != 0, 1 means eta_b^m = eta_c, c = S(b)/3 - 1.
 \\      Expected: the single pair (m, b, c) = (4, -1, 5).
-\\  (3) the fields with n(b) >= 3 (paper2 Thm C: b in {-75,-3,3,5,9,96}):
+\\  (3) the fields with n(b) >= 3 and |b| <= 10^30
+\\      (paper2 Thm C: b in {-75,-3,3,5,9,96}):
 \\      eta_0 = the positive n(b)-th root of eta_b in K_b (exact: eta_0^n == eta_b),
 \\      and for 1 <= j <= JMAX, is eta_0^j of h-type, and for which c?
 \\      Expected: only j = n(b), c = b; and for b = 5 also j = 1, c = -1.

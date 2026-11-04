@@ -459,8 +459,10 @@ class InfiniteReductionPadic(object):
 
     Same fixed schedule as the rational InfiniteReduction, and same rule as
     E057: the schedule stops at m_min = -ord_0(W^inf), inside Remark 3.5, so
-    that the exact form subtracted lies in B_0 cap B_inf.  Going below that is
-    legitimate only when the output is a residue, which is not the case here.
+    that the exact form subtracted is d of a function in B_0: it has poles
+    only above x = infinity (it is not in B_inf, and need not be).  Going
+    below that is legitimate only when the output is a residue, which is not
+    the case here.
     """
 
     def __init__(self, RR):

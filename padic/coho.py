@@ -82,7 +82,7 @@ class _LocalExpansion(object):
     at 4 and 52 s at 6, so the precision 28 that §4.5 needs is out of reach,
     while E066-E074 got away with it on C_4 and the two hyperelliptic curves.
     It is priced per ELEMENT as well: rational functions of x alone are free at
-    any precision, y^3 costs 4 s at precision 4, and one of §6.1's own
+    any precision, y^3 costs 4 s at precision 4, and one of §6.4's own
     differentials -- a forty-monomial numerator over Q_y -- did not finish in
     two hours at precision 4.
 
@@ -477,7 +477,7 @@ class Cohomology(object):
         Changing the representative can, because omega_i + du_i has the same
         class and is still in E (du is a column of d_matrix).
 
-        THE SYMPLECTIC HALF.  [BDM+19] §4.2 additionally asks that the basis be
+        THE SYMPLECTIC HALF.  [BDM+19] §4.1 additionally asks that the basis be
         symplectic for the cup product, and it is kept here.
 
         (E074 CORRECTS what E070 concluded from that.  E070 read the pairings
@@ -486,7 +486,7 @@ class Cohomology(object):
         for the cup product, and that it is NOT isotropic for the coordinate dot
         product -- all three measured here.  The premise is right and the
         conclusion is wrong: the pairing is the plain evaluation of a functional,
-        because the middle slot is V_dR = H^1_dR(X)^* in its DUAL basis (§4.2),
+        because the middle slot is V_dR = H^1_dR(X)^* in its DUAL basis (§4.1),
         so beta^T . v is a dot product of coordinates and s_2 projects onto
         Fil^0 V_dR = Ann(Fil^1 H^1_dR) = the LAST g coordinates.  The ambiguity
         then pairs to zero because it lives in the first g, not because Fil^1 is
@@ -716,7 +716,7 @@ class Cohomology(object):
         om must be (sum_i u_i(x) y^i) dx / r with the u_i POLYNOMIAL and within
         the bounds of Theorem 3.6; both are checked rather than assumed, since
         a differential written down by hand -- E075 feeds this the published
-        basis of [BDM+19] §6.1, given as (polynomial in x, y) dx/Q_y -- has no
+        basis of [BDM+19] §6.4, given as (polynomial in x, y) dx/Q_y -- has no
         reason to lie in E, and r/(dQ/dy) being integral (Proposition 2.4) is
         what makes that particular shape land inside it.
         """
@@ -735,9 +735,12 @@ class Cohomology(object):
 
             <omega, eta> = sum_P Res_P(f_omega * eta),    d f_omega = omega,
 
-        the sum over the poles.  E062(d) established that Tuitman's E_0 forms
-        are regular at every FINITE point -- their poles are all at infinity --
-        so the sum has very few terms (one place, of degree 4, for C_4).
+        the sum over the poles.  A general E_0 form can have simple poles over
+        the zeros of r, but the forms of ker(res) -- the H1X basis among them
+        -- are regular at the FINITE points, as E062(d) measured; their poles
+        are then all at infinity, so the sum has very few terms (one place, of
+        degree 4, for C_4).  The poles are located by _pole_places in any
+        case, not assumed.
 
         THIS IS EXACT AND HAPPENS OVER Q.  No p-adic approximation enters: the
         local expansions come from the function field's completion, the residue
@@ -837,9 +840,10 @@ class Cohomology(object):
         """A trace-zero, Rosati-symmetric Z in End(J) from that involution.
 
         THIS IS THE ENDOMORPHISM MATRIX.  Everything in [BDM+19] §§4.5 and 5.2
-        needs the CLASS instead -- see correspondence_class, and E071 for the
-        measurement that they are different and that only the class satisfies
-        the conditions those sections are derived from.
+        (arXiv v1; Annals §§4.5 and 5.3) needs the CLASS instead -- see
+        correspondence_class, and E071 for the measurement that they are
+        different and that only the class satisfies the conditions those
+        sections are derived from.
 
         Balakrishnan-Dogra-Mueller-Tuitman-Vonk need a class in
         Ker(NS(J) -> NS(X)); for a curve NS(X) = Z and the map is the trace, so
@@ -850,10 +854,13 @@ class Cohomology(object):
 
             Z = d_- pi_+  -  d_+ pi_- ,     d_+- = dim of the +- eigenspace,
 
-        normalised here by dividing out the content.  Remark 3.17 of that paper
-        explicitly allows this route -- knowing generators of End(J) in advance
-        -- in place of the Hecke operator, which is the ONLY step of their
-        algorithm specific to modular curves.
+        normalised here by dividing out the content.  Remark 3.17 of
+        Balakrishnan-Dogra-Mueller-Tuitman-Vonk, *Quadratic Chabauty for
+        modular curves: algorithms and examples* (Compos. Math. 159 (2023);
+        arXiv:2101.01862) -- not of [BDM+19] -- explicitly allows this route --
+        knowing generators of End(J) in advance -- in place of the Hecke
+        operator, which is the ONLY step of their algorithm specific to modular
+        curves.
         """
         S = self.automorphism_matrix(sx, sy)
         n = S.nrows()
@@ -871,10 +878,12 @@ class Cohomology(object):
     def correspondence_class(self, sx=1, sy=1, endo=None):
         """The COHOMOLOGY CLASS of that correspondence: Z = sum Z_ij om_i (x) om_j.
 
-        [BDM+19] §4.1 defines Z as a class in H^1_dR(X) (x) H^1_dR(X) subject to
-        four conditions, then in §4.4 writes "the matrix of the correspondence Z
-        on H^1_dR(X)" for the same symbol.  Those are two different matrices,
-        and every formula of §§4.5 and 5.2 needs the CLASS: (22) is derived from
+        [BDM+19] §4.4 defines Z as a class in H^1_dR(X) (x) H^1_dR(X) subject to
+        four conditions, then later in §4.4 writes "the matrix of the
+        correspondence Z on H^1_dR(X)" for the same symbol.  Those are two
+        different matrices, and every formula of §§4.5 and 5.2 (arXiv v1
+        numbering; Annals §§4.5 and 5.3) needs the CLASS: v1 (22) = Annals (45)
+        is derived from
         F^T Z F = pZ, which is condition (a), and the endomorphism matrix does
         not satisfy it (measured, E071: valuation 0 where the certified
         precision is 5).
@@ -883,7 +892,7 @@ class Cohomology(object):
 
             Z  =  Z_e M^{-1}   ( = M^{-1} Z_e^T, by Rosati symmetry ),
 
-        and each of §4.1's four conditions is one of E067's four properties of
+        and each of §4.4's four conditions is one of E067's four properties of
         Z_e -- so this is a proof, not a fit:
 
           (d) Z antisymmetric        <=>  M Z_e = Z_e^T M      (Rosati)
@@ -959,8 +968,14 @@ class Cohomology(object):
     def _dg_expr(Z, ser, Om, n, printed=False):
         """The local right-hand side of dg_x, before eta is subtracted.
 
-        THE GAUGE EQUATION, NOT [BDM+19] (19).  Write the gauge transformation
-        of §4.5 as G = [[1,0,0],[A,1,0],[c,b^T,1]].  Then
+        THE GAUGE EQUATION, NOT (19) OF [BDM+19] arXiv v1.  Equation numbers
+        here are those of arXiv:1711.05846v1, whose (17), (18), (19) are the
+        Annals version's (27), (28), (29).  The sign error discussed below is
+        in v1 only: Annals (29), with dOmega = -omega and dg_x = Omega^T Z
+        dOmega - eta, is what is derived here (its Omega is minus ours).
+
+        Write the gauge transformation of §4.5 (v1; Annals §4.4) as
+        G = [[1,0,0],[A,1,0],[c,b^T,1]].  Then
 
             G^-1 dG = [[0,0,0],[dA,0,0],[dc - b^T dA, db^T, 0]],
 
@@ -969,18 +984,18 @@ class Cohomology(object):
 
             dc = b^T dA - eta = Omega^T Z omega - eta.
 
-        (19) prints A = +Omega together with dOmega = omega, which already
+        v1 (19) prints A = +Omega together with dOmega = omega, which already
         contradicts (18) with (17)'s sign, and gives
 
             dg_x = dOmega^T Z Omega - Omega^T (Z - Z^T) omega - eta
                  = Omega^T (2Z^T - Z) omega - eta,
 
         which agrees with the gauge equation if and only if Z is SYMMETRIC.
-        The Z of §4.1 is antisymmetric, and there the printed formula is -3
-        times the right one on the Z term.  E067--E070 used the endomorphism
-        matrix, which IS symmetric, so the two errors cancelled and neither was
-        visible; E071 corrects both.  printed=True reproduces (19) as printed
-        and is used by the gates as a negative control.
+        The Z of §4.4 is antisymmetric (condition (d)), and there the v1
+        formula is -3 times the right one on the Z term.  E067--E070 used the
+        endomorphism matrix, which IS symmetric, so the two errors cancelled
+        and neither was visible; E071 corrects both.  printed=True reproduces
+        v1 (19) as printed and is used by the gates as a negative control.
         """
         expr = ser[0].parent().zero()
         for i in range(n):
@@ -1002,14 +1017,15 @@ class Cohomology(object):
             Omega^T Z omega - eta
 
         has vanishing residue at every point of D -- see _dg_expr for why that,
-        and not the expression printed in (19).  Omega is the vector of
-        formal integrals of the basis differentials, so this is computed from
-        the same local expansions E066 uses for the cup product.
+        and not the expression printed in arXiv v1 (19).  Omega is the vector
+        of formal integrals of the basis differentials, so this is computed
+        from the same local expansions E066 uses for the cup product.
 
         The residue at a place of degree f is an element of its residue field,
         i.e. f rational conditions; summing to zero by the residue theorem, they
         leave d - 1 independent ones against the d - 1 unknowns, which is the
-        uniqueness of [BDM+19, Lemma 4.10] made concrete.
+        uniqueness of [BDM+19, Lemma 4.10] (Annals numbering; in arXiv v1 it
+        is a sentence after (17)) made concrete.
 
         Returns (coefficients, eta as an E-vector, the residues before and
         after subtracting eta).
@@ -1151,8 +1167,9 @@ class Cohomology(object):
     def _fil0_quadratic(Z, Om, n, g):
         r"""Omega^T Z s_2 Omega, with s_2 the projection onto Fil^0 V_dR.
 
-        THE TERM [BDM+19] §4.5 STEP (iii) IS MISSING (E074, derived there).
-        V_dR = H^1_dR(X)^* (§4.2: "let T_0,...,T_{2g+d-2} be the DUAL basis"),
+        THE TERM THAT arXiv v1 OF [BDM+19] MISSES IN §4.5 STEP (iii) (E074, derived
+        there; the published §4.5 step (iii) contains it).
+        V_dR = H^1_dR(X)^* (§4.1: "let T_0,...,T_{2g+d-2} be the DUAL basis"),
         so Fil^0 V_dR = Ann(Fil^1 H^1_dR) is spanned by the LAST g dual basis
         vectors as soon as the first g omega_i are honest holomorphic
         differentials -- which is [BT] Def 2.16(1), i.e. phase4_basis().  Hence
@@ -1160,7 +1177,7 @@ class Cohomology(object):
 
             Omega^T Z s_2 Omega = sum_i sum_{j >= g} Z_ij Omega_i Omega_j.
 
-        By §4.1(b), Z_ij = 0 when i and j are both >= g, so this is a sum of
+        By §4.4(b), Z_ij = 0 when i and j are both >= g, so this is a sum of
         products of a REGULAR Omega_i (i < g) with a SINGULAR Omega_j, and it
         has a principal part in general.
         """
@@ -1240,9 +1257,10 @@ class Cohomology(object):
         2.16(1) (else s_2 is not the last-g projection) and says so.
 
         Step (ii) integrates dg_x = Omega^T Z omega - eta place by place (see
-        _dg_expr: that is what the gauge equation (18) gives, and it is not the
-        expression printed in (19)); it is legitimate exactly because step (i)
-        made the residue vanish, and that is CHECKED here rather than assumed.
+        _dg_expr: that is what the gauge equation v1 (18) gives, and it is not
+        the expression printed in v1 (19)); it is legitimate exactly because
+        step (i) made the residue vanish, and that is CHECKED here rather than
+        assumed.
 
         Step (iii) asks for constants beta and a function gamma in H^0(Y, O)
         with g_x - gamma - beta^T Omega_x in K[[t_x]] for every x in D.  The
@@ -1261,12 +1279,13 @@ class Cohomology(object):
         series; calling the completion map on each x^k b^0_i separately is what
         made the first version take 12 minutes on C_4 instead of seconds.
 
-        BETA IS NOT UNIQUE, contrary to a literal reading of [BDM+19, Lemma
-        4.7].  If sum_i beta_i omega_i is holomorphic its primitive has no
-        principal part, so that beta is invisible to the defining condition;
-        together with the constants in gamma the solution space is
-        (g+1)-dimensional, which the gate measures and compares against
-        holomorphic_classes().
+        BETA IS NOT UNIQUE, contrary to a literal reading of [BDM+19] arXiv v1,
+        Lemma 4.7 (the Annals version asks only for the last g entries b_Fil,
+        before its Theorem 4.11).  If sum_i beta_i omega_i is holomorphic its
+        primitive has no principal part, so that beta is invisible to the
+        defining condition; together with the constants in gamma the solution
+        space is (g+1)-dimensional, which the gate measures and compares
+        against holomorphic_classes().
 
         Two consequences, and the second is easy to get wrong.  (1) A choice
         must be made, and we make it by killing the Fil^1 component of beta in
@@ -1287,7 +1306,7 @@ class Cohomology(object):
         primitives Omega.  Since dg_x = Omega^T Z omega - eta the equation gains
         c^T Z omega, so g_x moves by c^T Z Omega and beta by Z^T c modulo the
         above ambiguity; the gate checks that, and checks the sharper statement
-        that the corrected pair solves the unshifted problem.  (With (19) as
+        that the corrected pair solves the unshifted problem.  (With v1 (19) as
         printed the shift would be (2Z - Z^T)c instead, so this is also a check
         on _dg_expr.)
 
@@ -1403,7 +1422,7 @@ class Cohomology(object):
                 # (place, Omega, g_x as used) per place of D: E074's gate needs
                 # them to check the Fil^0 subbundle condition directly.
                 "local": [(P, Om, gx) for (P, Om, gx, _) in data]}
-        # kill the Fil^1 component of beta: [BDM+19, Lemma 4.7]'s ambiguity
+        # kill the Fil^1 component of beta: [BDM+19, v1 Lemma 4.7]'s ambiguity
         if ker.dimension():
             S = self.adapted_change_of_basis(basis)
             coords = S.solve_left(vector(QQ, list(sol)[nc:]))

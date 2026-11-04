@@ -48,10 +48,12 @@ pts := [C | [1,3,1], [1,-3,1], [-1,3,1], [-1,-3,1], [-2,6,1], [-2,-6,1],
 for Q in pts do
   PointOnRegularModel(M2, Q);
 end for;
-// The component indices in these records are local to a patch (each record
-// carries a patch index), while Multiplicities and IntersectionMatrix are
-// global; E103 found that they cannot be compared across points without
-// matching the patches, and the paper does not use them.
+// These records also carry component indices, but E103 found them
+// inconsistent with Multiplicities: points are put on component 5, which has
+// multiplicity 2, and no Q_2-point can reduce to such a component.  E103's
+// conjectured explanation was patch-local indexing (each record carries a
+// patch index); the meaning of the indices is unsettled, and the paper does
+// not use them.
 
 // What does not work, for the record (E103):
 //   * RegularModel on the AFFINE quartic fails: "Bad affine curve (there are

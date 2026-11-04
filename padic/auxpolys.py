@@ -22,8 +22,11 @@ statements used are:
   Definition 2.11  ord_{x0} extended to matrices by the minimum over entries.
 
 W^inf is *computed*, not assumed: Sage's function-field machinery returns an
-integral basis at infinity, which is exactly what Assumption 3 asks for.  So
-Assumption 3 is discharged by construction, as E055 anticipated.
+integral basis at infinity over Q[x^{-1}], which is the rational half of
+Assumption 3 and is discharged by construction, as E055 anticipated.  The
+other half -- W^inf and its inverse in GL_{dx}(Z_q[x,x^{-1}]), i.e. p-integral
+Laurent polynomials -- depends on p and is checked per prime when
+padic/reductions.py coerces them to Z_p (an ArithmeticError if not).
 
 NAMING.  Tuitman's (x, y) = (base, fibre).  For C_4 that is (t, w) of E037.
 This module keeps Tuitman's names throughout.
@@ -194,7 +197,8 @@ class TuitmanCurve(object):
 
         A form in E_0 is (sum_i u_i(x) y^i) dx/r.  Writing the same function in
         the b^inf basis multiplies the i-th coefficient by the i-th column of
-        W0 * Winf^{-1}; Theorem 3.6's condition on E_infinity is
+        Winf^{-1} * W0 (= Winf^{-1} when W0 = I, Assumption 2, so that the b^0
+        are the powers of y); Theorem 3.6's condition on E_infinity is
         ord_inf(u~) > ord_0(W^inf) - deg(r) + 1.  Returns the list of maximal
         degrees for u_0, ..., u_{dx-1} (a negative entry means that coordinate
         is forced to be 0).

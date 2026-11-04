@@ -23,8 +23,9 @@
  *      u^n < 4 beta^2 < l^{n+1}.  The box (13) is checked with sqrtnint.
  *
  *  (b) A cleaner form of the non-reciprocity step.  For X^3 - BX^2 + AX - 1 one
- *      has z^3 P(1/z) = -(X^3 - AX^2 + BX - 1), so P is reciprocal exactly when
- *      A = B; and A = B forces P(1) = A - B = 0, contradicting irreducibility.
+ *      has z^3 P(1/z) = -(X^3 - AX^2 + BX - 1), so z^3 P(1/z) = +-P exactly
+ *      when A = B (and then it is -P); and A = B forces P(1) = A - B = 0,
+ *      contradicting irreducibility.
  *      For eta_b this is A - B = -3b^2, nonzero for b != 0.  (This is the
  *      argument of check-expo.gp; paper2 argues instead with the absolute
  *      values of the conjugates, which is equally correct.)
@@ -58,14 +59,15 @@
  *          sign of eq (1) at that integer
  *      A4  and |3(b+1)| <= 2 eta_b^{1/2} + 1, likewise exactly
  *   B. Lemma 8.2                                              [question 2]
- *      B1  z^3 P(1/z) = -(X^3 - AX^2 + BX - 1): P is reciprocal iff A = B
+ *      B1  z^3 P(1/z) = -(X^3 - AX^2 + BX - 1): it is +-P iff A = B
  *      B2  A = B forces P(1) = A - B = 0, impossible for an irreducible P;
  *          for eta_b, A - B = -3b^2 != 0
  *      B3  the conjugates have absolute values e, e^{-1/2}, e^{-1/2}, so the
  *          Mahler measure is e (paper2's route to the same conclusion)
  *      B4  rho is the real root of x^3-x-1, with the exact bracket l < rho < u
- *      B5  the fundamental unit of K_b exceeds rho, checked exactly by the sign
- *          of its characteristic polynomial at l and u
+ *      B5  for |b| <= 40 the fundamental unit of K_b is >= rho, with equality
+ *          only at b = 3; checked exactly by the sign of its characteristic
+ *          polynomial at u (or equality with X^3 - X - 1)
  *   C. Corollary 8.3                                          [question 3]
  *      C1  3 beta^2 + 3 beta + 5 <= 4 beta^2 for beta >= 5
  *      C2  beta = 10^30: the largest n with rho^n <= 4 beta^2 is 496,
@@ -187,7 +189,7 @@ checkB() =
   Q = X^3 * subst(P, X, 1/X);
   gate("B1  X^3 P(1/X) = -(X^3 - A X^2 + B X - 1)",
        numerator(Q + (X^3 - A*X^2 + B*X - 1)) == 0,
-       "so P is reciprocal exactly when A = B");
+       "so X^3 P(1/X) = +-P exactly when A = B");
   gate("B2a A = B forces P(1) = A - B = 0",
        subst(P, X, 1) == A - B,
        "impossible for an irreducible P: e would not generate a cubic field");
@@ -438,7 +440,7 @@ checkF() =
   gate("F3  the q dividing some n(b) form {1,2,3,4,6,8,13}",
        Set(Vec(qs)) == Set([1,2,3,4,6,8,13]),
        concat(concat("q-set = ", Str(Set(Vec(qs)))),
-              "; every other q <= 496 has no b, which is Theorem C"));
+              "; no other q <= 496 divides n(b) for |b| <= 10^30 (Thm C)"));
 
   /* b = 3: the fundamental unit is the plastic number */
   bnf = bnfinit(x^3 - 9*x - 27, 1);

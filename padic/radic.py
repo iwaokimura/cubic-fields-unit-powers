@@ -305,8 +305,10 @@ class RAdicRing(object):
         extension ring K = Q_p(p^{1/e}).
 
         THE CONVERGENCE CONDITION IS THE PAPER'S, NOT "r IS A UNIT".
-        Balakrishnan-Tuitman Proposition 4.3 with Remark 4.4: the functions
-        f_{i,0} converge exactly outside the closed disk ord_p(r(x)) >= 1/p.
+        Balakrishnan-Tuitman Proposition 4.3 with Remark 4.4: on a finite bad
+        disk the functions f_{i,0} are guaranteed to converge outside the
+        closed disk ord_p(r(x)) >= 1/p (a sufficient condition; inside it
+        convergence is not guaranteed, and such points are refused).
         Every good point satisfies this with room to spare (ord_p(r) = 0), and
         so does a point of a bad disk that has been pushed far enough away from
         the very bad point -- which is the whole reason Algorithm 3.12 works in

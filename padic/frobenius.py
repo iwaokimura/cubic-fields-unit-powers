@@ -85,8 +85,13 @@ class FrobeniusMatrix(object):
     def certified_precision(self):
         """N minus the losses Propositions 3.7 and 3.8 allow.
 
-        This is a theorem-backed statement about the answer, unlike anything
-        the fixed-precision arithmetic could report about itself.
+        This is a theorem-backed statement about Phi, unlike anything the
+        fixed-precision arithmetic could report about itself.  It is also the
+        precision of chi(T) only if ord_p(Phi) >= 0, the standing assumption
+        in the proof of Tuitman's Proposition 4.4 (arXiv v2 numbering), under
+        which det(1 - Phi T) loses nothing.  Otherwise Remark 4.5 there
+        subtracts a further -(2g-1) ord_p(Phi) (n = 1), and that valuation is
+        not checked here.
         """
         from sage.all import floor, log
         p = self.p
@@ -228,7 +233,7 @@ class FrobeniusMatrix(object):
         which is what unit_root_subspace and the change of basis need; chi(T)
         cannot see the difference, and neither can the point counts that
         calibrate it, so the transpose has to be tracked by hand.  E071 depends
-        on getting it right: condition (a) of [BDM+19] §4.1 reads
+        on getting it right: condition (a) of [BDM+19] §4.4 reads
         F^T Z F = pZ with F = Phi^T.
         """
         n = self.H.dim_E
@@ -286,12 +291,23 @@ class FrobeniusMatrix(object):
     def chi(self):
         """chi(T) = det(1 - Phi T), rounded to Z[T].
 
-        Returns (chi over QQ with integer coefficients, the least p-adic
-        precision among the coefficients).  That precision -- NOT the distance
-        from the rounded value, which is zero by construction -- is what says
-        whether the rounding is determined: the coefficients are bounded by
-        binomial(2g,g) p^{g/2}, so precision above log_p of twice that pins
-        them.
+        Returns (chi over QQ with integer coefficients, the certified p-adic
+        precision cert of its coefficients).  That precision -- NOT the
+        distance from the rounded value, which is zero by construction -- is
+        what says whether the rounding is determined.  It is the certified
+        precision of Phi when ord_p(Phi) >= 0; otherwise the further loss
+        (2g-1) (-ord_p(Phi)) of Tuitman's Remark 4.5 (arXiv v2 numbering,
+        n = 1) is subtracted.  (Until 2026-11-04 that case was not checked.)
+        As in Tuitman (arXiv v2, proof of Prop. 4.4), only
+        the BOTTOM half c_0, ..., c_g is rounded: these satisfy
+        |c_k| <= binomial(2g,k) p^{k/2} <= binomial(2g,g) p^{g/2}, so
+        p^cert > 2 binomial(2g,g) p^{g/2} pins them.  The top half is then
+        given by the functional equation c_{2g-k} = p^{g-k} c_k.  (The top
+        coefficients themselves reach p^g = c_{2g}, so rounding them at the
+        same precision would NOT be determined; until 2026-11-04 this method
+        rounded all 2g+1 of them.)  Where cert does pin a top coefficient as
+        well, its rounding is compared with the functional equation and a
+        mismatch raises.
 
         Sign convention, and it is the one that bit E059: with
         cp(T) = det(T - Phi) = sum_j a_j T^j of degree d,
@@ -306,10 +322,39 @@ class FrobeniusMatrix(object):
         RT = PolynomialRing(QQ, 'T')
         cp = self.Phi.charpoly()
         coeffs = list(cp)
-        d = 2 * self.g
+        from sage.all import binomial
+        g, p = ZZ(self.g), ZZ(self.p)
+        d = 2 * g
         cert = self.certified_precision()[0]
-        out = [self._round(coeffs[d - k], cert) for k in range(d + 1)]
+        vphi = min([c.valuation() for c in self.Phi.list() if c != 0])
+        if vphi < 0:
+            cert = cert - (d - 1) * (-vphi)
+        if cert < 1:
+            raise ArithmeticError(
+                "chi: ord_p(Phi) = %s, so by Tuitman's Remark 4.5 the "
+                "certified precision of chi(T) is p^%s; raise N" % (vphi, cert))
+        out = [self._round(coeffs[d - k], cert) for k in range(g + 1)]
+        for k in range(g + 1, d + 1):
+            ck = p**(k - g) * out[d - k]
+            # |c_k| <= binomial(2g,k) p^{k/2}; p^cert pins c_k when
+            # p^{2 cert} > 4 binomial(2g,k)^2 p^k (exact, no square roots).
+            if p**(2 * ZZ(cert)) > 4 * binomial(d, k)**2 * p**k:
+                rk = self._round(coeffs[d - k], cert)
+                if rk != ck:
+                    raise ArithmeticError(
+                        "chi: coefficient of T^%d rounds to %s but the "
+                        "functional equation gives %s" % (k, rk, ck))
+            out.append(ck)
         return RT(out), cert
+
+    def chi_certified_precision(self):
+        """The certified precision chi() will use: that of Phi, minus
+        (2g-1)(-ord_p(Phi)) when ord_p(Phi) < 0 (Tuitman, Remark 4.5)."""
+        if self.Phi is None:
+            self.compute()
+        cert = self.certified_precision()[0]
+        vphi = min([c.valuation() for c in self.Phi.list() if c != 0])
+        return cert - (2 * self.g - 1) * max(0, -vphi), vphi
 
     def weil_check(self, chi):
         """|c_k| <= binomial(2g,k) p^{k/2} for the coefficients of chi.
