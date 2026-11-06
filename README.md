@@ -4,7 +4,8 @@ PARI/GP and SageMath scripts accompanying
 
 > I. Kimura and H. Umemoto,
 > *On explicit units in a family of cubic fields and the arithmetic of curves
-> arising from powers of these units*.
+> arising from powers of these units*,
+> [arXiv:2611.07333](https://arxiv.org/abs/2611.07333) [math.NT].
 
 This is the sequel to
 [cubic-fields-explicit-units](https://github.com/iwaokimura/cubic-fields-explicit-units)
@@ -90,7 +91,8 @@ internal research log and can be ignored.
 
 ## What each script checks
 
-Section and theorem numbers refer to the paper.
+Section and theorem numbers refer to the arXiv version of the paper,
+[arXiv:2611.07333v1](https://arxiv.org/abs/2611.07333v1).
 
 ### The E020–E040 suite: geometry of the curves, the sweep, and the dictionary
 
